@@ -189,27 +189,46 @@ class Graph:
         The chaining algorithm required ClustalW MSA.
         :return:
         """
+        # Initialise arbitrary source and target vertices
         source = Vertex(_SPF.SOURCE, 0)
         target = Vertex(_SPF.TARGET, 0)
+        # Final chain
         chain = []
 
+        # Iterate over vertex map
         for name, v in self._V.items():
+            # Assign zero from source
             source.edges[name] = 0
+            # Assign zero cost to target
             v.edges[_SPF.TARGET] = 0
 
+        # Insert source vertex in to vertex map
         self._V[_SPF.SOURCE] = source
+        # Insert target vertex in vertex map
         self._V[_SPF.TARGET] = target
 
+        # Iterate over every vertex in vertex map
         for name, v in self._V.items():
+            # Iterate over all edges of vertex
             for n, w in v.edges.items():
+                # If neighbour's distance is less than
+                # current vertex's distance + cost to neighbour
                 if self._V[n].value < (v.value + w):
+                    # Set neighbour's distance
                     self._V[n].value = v.value + w
+                    # Set neighbour's predecessor
                     self._V[n].pred = v.name
+
+        # Initialise current to target's predecessor
         current = self._V[_SPF.TARGET].pred
 
+        # iterate backwards through predecessor chain
         while current is not None:
+            # Add predeessor name vertex to chain
             chain.append(current)
+            # Set current to predecessor
             current = self._V[current].pred
+
         return chain
 
 
