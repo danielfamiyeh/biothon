@@ -1,3 +1,4 @@
 import subprocess
 
-subprocess.call(["python", "test_seq.py"])
+if __name__ == "__name__":
+    subprocess.call(["python", "test_seq.py"])
