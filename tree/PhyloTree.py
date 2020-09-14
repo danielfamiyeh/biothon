@@ -9,7 +9,9 @@ class _Taxon:
         :param t_id: Taxon ID
         :param others: Number of other taxa in tree.
         """
-        self.id = t_id
+        self.id = t_id  # Numeric taxon label for indexing seqs
+
+        # Initialise distances to other seqs to -1
         self.dists = {str(i): -1 for i in range(others)}
         if t_id in self.dists:
             del self.dists[t_id]
@@ -27,13 +29,14 @@ class PhyloTree:
         Phylogenetic tree constructor
         :param seqs: Sequences to construct tree for
         """
+        # We need at least three sequences to construct a tree
         if len(seqs) > 3:
-            self.S = deepcopy(seqs)
+            self.S = deepcopy(seqs) # Copy over sequence info
             self.taxa = {str(i) : _Taxon(str(i), len(seqs))
                          for i in range(len(seqs))}
-            self.mergers = []
-            self.tree = None
-            self.trees = {}
+            self.mergers = []   # Initialise empty merger history list
+            self.tree = None    # Final tree
+            self.trees = {}     # Subtrees
         else:
             raise ValueError("Length of sequence list must be 3+"
                              "for tree construction.")
@@ -43,28 +46,53 @@ class PhyloTree:
         Constructs nested tuple representation.
         :return: None
         """
+        # TODO: Change for all sequence types
         aligner = PairAligner(NucleoScoreMatrix(NucleoScoreType.IDENTITY))
-
+        # Initialise highest distance found tuple with
+        #   highest[0] = -1
+        #   highest[1] = (blank)
+        #   highest[2] = (blank)
         highest = -1, "", ""
 
+        # Enumerate taxon map
         for i, t in enumerate(self.taxa):
+            # Enumerate current taxon's distances
             for j, d in enumerate(self.taxa[t].dists):
+                # We only consider d > i since distance matrix
+                #   is symmetric
                 if int(d) > i:
+                    # Calculate distance using NW
                     dist = aligner.needle(self.S[int(t)], self.S[int(d)]).dist
+                    # Assign distances
                     self.taxa[t].dists[d] = dist
                     self.taxa[d].dists[t] = dist
+                    # Update highest tuple
                     if (i == 0 and j == 0) or dist < highest[0]:
                         highest = dist, t, d
+
+        # Merge two closest-related taxa
         self._merge(*highest)
 
+        # Loop until tree is constructed
+        # This is indiciated by the taxon map having
+        #   a length reduced to zero by successive
+        #   merge calls.
         while len(self.taxa) > 1:
+            # Highest distance found tuple with
+            #   h[0] = -1
+            #   h[1] = (blank)
+            #   h[2] = (blank)
             h = -1, "", ""
+
+            # Enumerate taxon map
             for i, t in enumerate(self.taxa):
+                # Enumerate distances in taxon map
                 for j, other in enumerate(self.taxa[t].dists):
+                    # Update highest distance found tuple
                     if (i == 0 and j == 0) or h[0] > self.taxa[t].dists[other]:
                         h = self.taxa[t].dists[other], t, other
             self._merge(*h)
-
+        # Stringified representation
         self.tree_repr = next(iter(self.taxa.keys()))
 
     def construct(self):
@@ -78,10 +106,26 @@ class PhyloTree:
         return self
 
     def _gen_leaf(self, n1, n2, d):
+        '''
+        Generates ASCII leaf
+        :param n1: Node/Leaf 1
+        :param n2: Node/Leaf 2
+        :param d: Depth
+        :return: None
+        '''
         return f"+{'-' * (2*d + (d-1)) + ' ' + str(n1)}\n" \
                f"│\n+{'-' * (2*d + (d-1)) + ' ' + str(n2)}"
 
     def _add_branch(self, *args, **kwargs):
+        '''
+        Adds branches between two subtree
+        :param kwargs:
+                subtree: Subtree to add branch to
+                subtree2: Secondary subtree to connect to first subtree
+                singleton: Single branch to connect to subtree
+                n1, n2: Two nodes to connect to subtree
+        :return:
+        '''
         s = ""
         tree_str = self.trees[kwargs["subtree"]].split("\n")
         if "subtree2" not in kwargs:

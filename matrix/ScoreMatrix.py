@@ -23,6 +23,7 @@ class _ScoreMatrix:
             return self.mat[i][j]
         except KeyError:
             try:
+                # Since substitution matrices are symmetric
                 return self.mat[j][i]
             except KeyError:
                 return 0
@@ -115,40 +116,3 @@ _AMINO_BLOSUM62 = {"A": {"A": 4, "C": 0, "D": -2,"E": -1, "F": -2, "G": 0, "H": 
                    "Y": {"Y": 7, "*": -4, "-": -1},
                    "*": {"*": 1, "-": -1},
                    "-": {"-": -1}}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

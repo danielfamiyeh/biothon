@@ -49,14 +49,19 @@ class BioIO:
         :param seq_type:    SeqType denoted by data in file.
         :return:            None
         """
+        # Check that param: fn is str and of correct format
         if isinstance(fn, str):
             if "." in fn:
                 name, ext = fn.split(".")
+                # If file is a fasta file
                 if ext == "fasta":
+                    # Initialise empty sequence list
                     seqs = []
                     with open(fn, "r") as fasta_file:
                         seq_name, seq_desc, seq = "", "", ""
+                        # Enumerate lines in file
                         for i, line in enumerate(fasta_file):
+                            # Line is the header line
                             if line.startswith(">"):
                                 if i > 0:
                                     seqs.append(Seq(seq, seq_type, name=seq_name, desc=seq_desc))

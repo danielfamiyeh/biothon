@@ -27,7 +27,7 @@ class PairAlignment:
                 # Increment not gapped count
                 no_gap += 1
 
-        # Calculte distance to 3 dp
+        # Calculate distance to 3 dp
         self.dist = round((mismatches/(no_gap if no_gap > 0 else 1) * 100), 3)
 
     def __str__(self):

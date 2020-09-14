@@ -1,8 +1,8 @@
 from enum import Enum
 from dist.Distance import *
 
-alphabet_dna = "ATCG"      # DNA Nucleotides
-alphabet_rna = "AUCG"      # RNA Nucleotides
+alphabet_dna = "ATCG"  # DNA Nucleotides
+alphabet_rna = "AUCG"  # RNA Nucleotides
 
 # Single letter amino acid codes
 alphabet_protein_1 = "ACDEFGHIKLMNPQRSTVWY*"
@@ -20,7 +20,6 @@ _alphabet_protein_full = ["Alanine", "Cysteine", "Aspartic Acid",
                           "Methionine", "Asparagine", "Proline", "Glutamine",
                           "Arginine", "Serine", "Threonine", "Valine",
                           "Tryptophan", "Tyrosine", "STOP"]
-
 
 # Amino acid lookup table
 # Reads out index of amino acid in protein alphabet list
@@ -47,11 +46,12 @@ _amino_acid_map = {"U": {"U": {"U": 4, "C": 4, "A": 9, "G": 9},
                          "A": {"U": 2, "C": 2, "A": 3, "G": 3},
                          "G": {"U": 5, "C": 5, "A": 5, "G": 5}}}
 
+
 class SeqType(Enum):
     """
     Biological sequence type enum
     """
-    STRINGG = 0
+    STRING = 0
     DNA = 1
     RNA = 2
     PROTEIN = 3
@@ -60,11 +60,13 @@ class SeqType(Enum):
 _nucleo_complement = {"A": "T", "C": "G", "T": "A", "G": "C"}
 _nucleo_transition = {"A": "G", "C": "T", "G": "A", "T": "C"}
 
+
 class Seq:
     """
     Sequence class, fundamental representation of biosequences with staistical
         and functional methods.
     """
+
     def __init__(self, seq, stype=SeqType.DNA, **kwargs):
         """
         Seq object constructor.
@@ -73,22 +75,29 @@ class Seq:
         :param kwargs:  name:   Name to identify Seq object (no spaces)
                         desc:   Description of sequence.
         """
-        alpha = alphabet_dna if stype is SeqType.DNA else\
-            alphabet_rna if stype is SeqType.RNA else\
-            alphabet_protein_1
 
+        # Initialise local alphabet based on SeqType
+        alpha = alphabet_dna if stype is SeqType.DNA else \
+            alphabet_rna if stype is SeqType.RNA else \
+                alphabet_protein_1
+
+        # Initialise sequence data to blank string
         self.seq = ""
 
+        # Enumerate sequence string
         for i, c in enumerate(seq):
+            # Check that character is part of alphabet
             if c.upper() not in alpha and c != "-":
+                # Else throw an error
                 raise ValueError(f"Character {c} at index {i} of sequence is not valid for {stype}.")
+            # Append character to sequence string
             self.seq += c.upper()
 
         self.seq_type = stype
-        self.name = kwargs.get("name", "").replace(" ", "")
+        self.name = kwargs.get("name", "").replace(" ", "")  # Sequence name with no spaces
         self.desc = kwargs.get("desc", "")
-        self.label = ""                         # For Guide/PhyloTree creation - Do not use.
-        self.weight = 1                         # For PhyloTree creation - Do not use.
+        self.label = ""  # For Guide/PhyloTree creation - Do not use.
+        self.weight = 1  # For PhyloTree creation - Do not use.
 
     # Class Methods
     def transit(self, seq):
@@ -99,18 +108,28 @@ class Seq:
         :param seq: Sequence to compare with.
         :return:    Ratio between transition subtitutions and transversion substituitons.
         """
-        if len(self) == len(seq) and\
-            self.seq_type is SeqType.DNA and\
+        # Check that sequences are of the same length and type
+        if len(self) == len(seq) and \
+                self.seq_type is SeqType.DNA and \
                 seq.seq_type is SeqType.DNA:
+            # Initialise counters to zero
             transitions = 0
             transversions = 0
+            # Iterate over sequence length
             for i in range(len(self)):
+                # If characters do not match
                 if self.seq[i] != seq[i]:
+                    # Check if substitution is a transition
                     if _nucleo_transition[self.seq[i]] == seq[i]:
+                        # If it is increment transition counter
                         transitions += 1
                     else:
+                        # Else increment transversion counter
                         transversions += 1
-            return round(transitions/transversions, 11)
+            # Return rounded answer to 11 decimal places
+            return round(transitions / transversions, 11)
+
+        # If sequences are not compatible then throw error
         else:
             raise ValueError("Sequences must both be DNA and be of equal"
                              "length for transition/transversion ratio.")
@@ -122,8 +141,12 @@ class Seq:
         :param other_seq:   Sequence to compare with
         :return:            Point mutation count.
         """
+        # Check that sequences are the same length
         if len(other_seq) == len(self):
+            # Call hamming distance metric since this gives
+            #   the number of point mutations
             return Distance.hamming(self.seq, other_seq.seq)
+        # If sequences are not the same length then throw error
         else:
             raise ValueError("Both sequences must be of same"
                              "length for point_mutations() method.")
@@ -134,10 +157,15 @@ class Seq:
         :param subseq:  Subsequence reprsenting motif.
         :return:        List of indices where motif can be found.
         """
+        # Initialise empty list of indices
         indices = []
+        # Iterate over sequence length wrt to substring length
         for i in range(len(self) - (len(subseq) - 1)):
-            if self[i: i+len(subseq)] == subseq:
+            # If substring found
+            if self[i: i + len(subseq)] == subseq:
+                # Append index list
                 indices.append(i)
+        # Return index list
         return indices
 
     def count(self):
@@ -145,13 +173,20 @@ class Seq:
         Counts the number of residues in sequence.
         :return: Dictionary containing residue counts.
         """
-        alpha = alphabet_dna if self.seq_type is SeqType.DNA else\
-                alphabet_rna if self.seq_type is SeqType.RNA else SeqType.PROTEIN
+        # Initialise local alphabet variable based on SeqType
+        alpha = alphabet_dna if self.seq_type is SeqType.DNA else \
+            alphabet_rna if self.seq_type is SeqType.RNA else SeqType.PROTEIN
+
+        # Initialise counter map
         counter = {c: 0 for c in alpha}
+
+        # Iterate over characters in sequence
         for c in self.seq:
             if c not in alpha:
                 counter[c] = 0
+            # Increment counter map
             counter[c] += 1
+        # Return counter map
         return counter
 
     def gc_content(self):
@@ -160,10 +195,14 @@ class Seq:
         :return:    G-C content.
         """
         if self.seq_type is SeqType.DNA:
+            # Count all residues
             counter = self.count()
+            # Sum GC counts
             gc = counter["G"] + counter["C"]
+            # Return GC content
             return (gc / (gc + counter["A"] + counter["T"])) * 100
         else:
+            # Throw type error if sequence isn't a DNA sequence
             raise TypeError("Sequence must be of DNA for GC content.")
 
     def comp(self):
@@ -172,10 +211,13 @@ class Seq:
         :return: None
         """
 
+        # Check that sequence is DNA or RNA
         if self.seq_type is SeqType.DNA or self.seq_type is SeqType.RNA:
+            # Replace seq with complement via joined list comprehension
             self.seq = ''.join(["A" if base == "U" else _nucleo_complement[base]
-                               for base in self.seq])
+                                for base in self.seq])
         else:
+            # Throw type error if sequence is not of valid type
             raise TypeError("Sequence type must be DNA or RNA for complement "
                             "method.")
 
@@ -185,10 +227,14 @@ class Seq:
         :return: None
         """
 
+        # Check that sequence is DNA or RNA
         if self.seq_type is SeqType.DNA or self.seq_type is SeqType.RNA:
+            # Get complement
             self.comp()
+            # Reverse complement
             self.seq = self.seq[::-1]
         else:
+            # Throw type error if sequence is not of valid type
             raise TypeError("Sequence type must be DNA or RNA for reverse "
                             "complement method.")
 
@@ -199,12 +245,18 @@ class Seq:
         :param args: Introns to be spliced.
         :return:     None
         """
+        # Check that sequence is a DNA sequence
         if self.seq_type is SeqType.DNA:
+            # Change sequence to RNA
             self.seq_type = SeqType.RNA
+            # For intron in args
             for s in args:
+                # Splice intron
                 self.seq = self.seq.replace(s, "")
+            # Join spliced sequence
             self.seq = ''.join(["U" if base == "T" else base for base in self.seq])
         else:
+            # Throw error if sequence is not a DNA sequence
             raise TypeError("Sequence type must be DNA for transcription "
                             "method.")
 
@@ -214,10 +266,14 @@ class Seq:
         Converts RNA sequence back into DNA sequence.
         Spliced introns remain spliced.
         """
+        # Check that sequence is an RNA sequence
         if self.seq_type is SeqType.RNA:
+            # Change sequence type back to DNA
             self.seq_type = SeqType.DNA
+            # Perform back transcription, introns are lost
             self.seq = ''.join(["T" if base == "U" else base for base in self.seq])
         else:
+            # Throw error if sequence is not an RNA sequence
             raise TypeError("Sequence type must be RNA for back-"
                             "transcription.")
 
@@ -231,34 +287,48 @@ class Seq:
                                 sequence.
         :return:  None
         """
+        # If sequence is DNA sequence
         if self.seq_type is SeqType.DNA:
+            # Transcribe first, then translate via recursive call
             self.scribe(*args)
             self.slate(stop_codon)
 
+        # If sequence is RNA
         elif self.seq_type is SeqType.RNA:
+            # Initialise empty codon list
             codon = []
+            # Initialise blank chain string
             chain = ""
+            # Initialse base (residue) count to zero
             base_count = 0
+            # Change sequence type to protein
             self.seq_type = SeqType.PROTEIN
 
+            # Iterate over residues in sequence
             for base in self.seq:
+                # Append current base to codon list
                 codon.append(base)
                 base_count += 1
 
+                # If we have three residues in codon list
                 if base_count % 3 == 0 and base_count > 0:
+                    # Lookup amino acid using residues and store
+                    #   in amino_index variable
                     amino_index = _amino_acid_map[codon[0]][codon[1]][codon[2]]
                     if stop_codon and amino_index == -1:
                         break
 
+                    # Add protein to polypeptide chain
                     chain += alphabet_protein_1[amino_index]
+                    # Clear codon list
                     codon.clear()
             self.seq = chain
 
         else:
+            # Throw error if sequence is not translatable
             raise TypeError(f"{self.seq_type} is not a translatable sequence "
                             f"type.")
 
-    # Magic Methods
     def __repr__(self):
         string = f"{self.name} | {self.seq_type}:\n"
         string += "".join([f"{c}\n" if i > 0 and i % 60 == 0

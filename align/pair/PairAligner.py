@@ -739,7 +739,7 @@ class PairAligner:
             # Enumerate ordered diagnoal dict
             for i, diag in enumerate(ordered_diags):
                 # Set indices
-                i = diag_starts[diag][0]    # TODO: ???
+                i = diag_starts[diag][0]
                 j = diag_starts[diag][1]
                 # Set ends
                 i_end = i + common_kwords[diag]
