@@ -1,10 +1,12 @@
 import unittest
 from src.seq import *
 
+
 class TestSeq(unittest.TestCase):
     def testConstructor(self):
         sequence = "ATTGCTGTCG"
-        self.assertEqual(sequence, Seq(sequence).seq)
+        self.seq = Seq(sequence)
+        self.assertEqual(sequence, self.seq.seq)
 
 
 if __name__ == '__main__':
