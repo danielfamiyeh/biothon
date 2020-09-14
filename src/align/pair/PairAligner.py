@@ -1,5 +1,5 @@
 from math import ceil
-from src.align.pair import PairAlignment
+from src.align.pair.PairAlignment import *
 from src.seq.Seq import *
 from collections import namedtuple
 from src.graph import Graph
@@ -22,7 +22,7 @@ class Pair:
 
 
 class PairAligner:
-    def __init__(self, score_matrix, match=1, mismatch=0, gap_open=1):
+    def __init__(self, score_matrix, match=1, mismatch=0, gap_open=0):
         """
         Pairwise aligner object constructor.
         :param score_matrix:    Scoring matrix for alignments.

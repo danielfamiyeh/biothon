@@ -58,6 +58,7 @@ class SeqType(Enum):
 
 
 _nucleo_complement = {"A": "T", "C": "G", "T": "A", "G": "C"}
+_rna_complement = {"A": "U", "C": "G", "U": "A", "G": "C"}
 _nucleo_transition = {"A": "G", "C": "T", "G": "A", "T": "C"}
 
 
@@ -213,10 +214,10 @@ class Seq:
         """
 
         # Check that sequence is DNA or RNA
-        if self.seq_type is SeqType.DNA or self.seq_type is SeqType.RNA:
-            # Replace seq with complement via joined list comprehension
-            self.seq = ''.join(["A" if base == "U" else _nucleo_complement[base]
-                                for base in self.seq])
+        if self.seq_type is SeqType.DNA:
+            self.seq = ''.join([_nucleo_complement[base] for base in self.seq])
+        elif self.seq_type is SeqType.RNA:
+            self.seq = ''.join(_rna_complement[base] for base in self.seq)
         else:
             # Throw type error if sequence is not of valid type
             raise TypeError("Sequence type must be DNA or RNA for complement "

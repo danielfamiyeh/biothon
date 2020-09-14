@@ -1,4 +1,5 @@
 from enum import Enum
+from copy import deepcopy
 
 class _SPF(Enum):
     """
@@ -6,6 +7,7 @@ class _SPF(Enum):
     """
     SOURCE = 0
     TARGET = 1
+
 
 class Vertex:
     """
@@ -31,7 +33,6 @@ class Graph:
     """
     def __init__(self):
         self._V = {}
-        self.num_edges = 0
         self.num_vertices = 0
 
     def __repr__(self):
@@ -52,10 +53,10 @@ class Graph:
     def neighbours(self, x):
         """
         Returns a list of neighbours of vertex x.
-        :param x:   Name of verte
+        :param x:   Name of vertex
         :return:
         """
-        return [neighbour for neighbour in self._V[x]]
+        return [neighbour for neighbour in self._V[x].edges]
 
     def add_vertex(self, x, v=0):
         """
@@ -69,6 +70,9 @@ class Graph:
             self._V[x] = Vertex(x, v)
         self.num_vertices += 1
 
+    def vertex_exists(self, x):
+        return x in self._V
+
     def remove_vertex(self, x):
         """
         Removes vertex with name x from graph.
@@ -79,9 +83,10 @@ class Graph:
             del self._V[x]
 
         for v in self._V:
-            for neighbour in self._V[v]:
-                if neighbour[0].value == x:
-                    self._V[v].edges.remove(neighbour)
+            old_edges = deepcopy(self._V[v].edges)
+            for neighbour in old_edges:
+                if neighbour == x:
+                    del self._V[v].edges[neighbour]
 
     def add_edge(self, x, y, w=0, directed=True):
         """
@@ -98,6 +103,8 @@ class Graph:
             self._V[x].edges[y] = w
             if not directed:
                 self._V[y].edges[x] = w
+        else:
+            raise ValueError("Vertices do not exist in graph.")
 
     def remove_edge(self, x, y):
         """
@@ -111,6 +118,13 @@ class Graph:
             source = self._V[x]
             if y in source.edges:
                 del source.edges[y]
+
+    def get_vertices(self):
+        """
+        Returns vertex map
+        :return: Vertex hash map
+        """
+        return self._V
 
     def get_vertex_value(self, x):
         """

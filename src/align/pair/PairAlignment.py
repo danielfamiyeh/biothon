@@ -4,7 +4,7 @@ class PairAlignment:
         Pairwise alignment object constructor.
         :param args:    Two aligned strings and their alignment score
         :param kwargs:  s1_name, s2_name representing the names
-                            given to the sequences durign construction
+                            given to the sequences during construction
         """
 
         mismatches, no_gap = 0, 0
@@ -31,12 +31,12 @@ class PairAlignment:
         self.dist = round((mismatches/(no_gap if no_gap > 0 else 1) * 100), 3)
 
     def __str__(self):
-        tab = '\t'
+        tab = '\t' if self.len_longest_name > 0 else ''
         # Print both sequences with tabs to align them
-        return f"{self.s1_name}{' '*(self.len_longest_name-len(self.s1_name)) + tab*2}{self.seq1}\n"\
-               + f"{' '*self.len_longest_name+2*tab}" + ''.join("|" if self.seq1[i] == self.seq2[i]\
+        return f"{self.s1_name}{' '*(self.len_longest_name-len(self.s1_name)) + tab}{self.seq1}\n"\
+               + f"{' '*self.len_longest_name + tab}" + ''.join("|" if self.seq1[i] == self.seq2[i]\
                else " " for i in range(len(self.seq1))) + "\n" + \
-               f"{self.s2_name}{' '*(self.len_longest_name-len(self.s2_name)) + tab*2}{self.seq2}\n"                \
+               f"{self.s2_name}{' '*(self.len_longest_name-len(self.s2_name)) + tab}{self.seq2}\n"                \
                + "\n" + f"Score: {self.score}" + f"\nDistance: {self.dist}%"
 
     def __repr__(self):
