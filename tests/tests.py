@@ -1,6 +1,7 @@
 import unittest
 from src.seq import *
 
+
 class TestSeq(unittest.TestCase):
     def testConstructor(self):
         sequence = "ATTGCTGTCG"
