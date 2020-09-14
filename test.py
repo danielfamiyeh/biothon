@@ -1,4 +1,11 @@
-import subprocess
+import unittest
+from src.seq import *
 
-if __name__ == "__name__":
-    subprocess.call(["python", "tests/test_seq.py"])
+class TestSeq(unittest.TestCase):
+    def testConstructor(self):
+        sequence = "ATTGCTGTCG"
+        self.assertEqual(sequence, Seq(sequence))
+
+
+if __name__ == '__main__':
+    unittest.main()
