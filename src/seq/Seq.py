@@ -95,7 +95,7 @@ class Seq:
             self.seq += c.upper()
 
         self.seq_type = stype
-        self.id = kwargs.get("id", "")
+        self.id = str(kwargs.get("id", ""))
         self.name = kwargs.get("name", "")
         self.desc = kwargs.get("desc", "")
         self.label = ""  # For Guide/PhyloTree creation - Do not use.
@@ -129,7 +129,7 @@ class Seq:
                         # Else increment transversion counter
                         transversions += 1
             # Return rounded answer to 11 decimal places
-            return round(transitions / transversions, 11)
+            return round(transitions / transversions, 5)
 
         # If sequences are not compatible then throw error
         else:

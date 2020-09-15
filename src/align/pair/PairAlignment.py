@@ -1,5 +1,5 @@
 class PairAlignment:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args):
         """
         Pairwise alignment object constructor.
         :param args:    Two aligned strings and their alignment score
@@ -9,15 +9,11 @@ class PairAlignment:
 
         mismatches, no_gap = 0, 0
 
-        # Assign sequence names
-        self.s1_name = kwargs.get("s1_name", "")
-        self.s2_name = kwargs.get("s2_name", "")
-
         # Assign sequence data
         self.seq1, self.seq2, self.score = args
 
         # Length of longest sequence name
-        self.len_longest_name = max(len(self.s1_name), len(self.s2_name))
+        self.len_longest_id = max(len(self.seq1.id), len(self.seq2.id))
 
         # Iterate over both sequences
         for char1, char2 in zip(self.seq1, self.seq2):
@@ -30,14 +26,40 @@ class PairAlignment:
         # Calculate distance to 3 dp
         self.dist = round((mismatches/(no_gap if no_gap > 0 else 1) * 100), 3)
 
+        self.string = ""
+        self._form_string()
+
+    def _form_string(self):
+        self.string = ""
+        tab = '\t' if self.len_longest_id > 0 else ''
+
+        before_seq1 = self.seq1.id + ' ' * (self.len_longest_id - len(self.seq1.id)) + tab
+        before_pipes = ' ' * self.len_longest_id + tab
+        before_seq2 = self.seq2.id + ' ' * (self.len_longest_id - len(self.seq2.id)) + tab
+
+        splits = [[], [], []]
+        prefixes = [before_seq1, before_pipes, before_seq2]
+        for i in range(3):
+            count = - 1
+            for j in range(len(self.seq1)):
+                if j % 60 == 0:
+                    splits[i].append([prefixes[i]])
+                    count += 1
+                splits[i][count].append(
+                    self.seq1[j] if i == 0 else
+                    ("|" if self.seq1[j] == self.seq2[j] else " ") if i == 1
+                    else self.seq2[j]
+
+                )
+
+        for i in range(len(splits[0])):
+            self.string += ''.join(splits[0][i]) + "\n"
+            self.string += ''.join(splits[1][i]) + "\n"
+            self.string += ''.join(splits[2][i]) + "\n\n"
+
     def __str__(self):
-        tab = '\t' if self.len_longest_name > 0 else ''
-        # Print both sequences with tabs to align them
-        return f"{self.s1_name}{' '*(self.len_longest_name-len(self.s1_name)) + tab}{self.seq1}\n"\
-               + f"{' '*self.len_longest_name + tab}" + ''.join("|" if self.seq1[i] == self.seq2[i]\
-               else " " for i in range(len(self.seq1))) + "\n" + \
-               f"{self.s2_name}{' '*(self.len_longest_name-len(self.s2_name)) + tab}{self.seq2}\n"                \
-               + "\n" + f"Score: {self.score}" + f"\nDistance: {self.dist}%"
+        tab = '\t' if self.len_longest_id > 0 else ''
+        return self.string
 
     def __repr__(self):
         pass

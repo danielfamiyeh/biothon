@@ -104,6 +104,9 @@ class TestSeq(unittest.TestCase):
         self.assertEqual([0, 1, 2, 3], seq.find_motif("AAA", overlap=True))
         self.assertEqual([0, 3], seq.find_motif("AAA"))
 
+    def testTransitTransver(self):
+        self.assertEqual(round(1/3, 5), self.dna1.transit(self.dna2))
+
     def testPrint(self):
         self.dna1.id = "1234634"
         self.dna1.name = "Name"
@@ -138,7 +141,6 @@ class TestSeq(unittest.TestCase):
         # Getitem tests
         self.assertEqual(self.dna_sequence1[4], self.dna1[4])
         self.assertEqual(self.dna_sequence2[1:3], self.dna2[1:3])
-
 
 if __name__ == '__main__':
     unittest.main()
