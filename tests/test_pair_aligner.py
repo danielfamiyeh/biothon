@@ -6,7 +6,7 @@ class TestPairAligner(unittest.TestCase):
     def setUp(self):
         self.seq1 = Seq("TGGTG")
         self.seq2 = Seq("ATCGT")
-        self.aligner = PairAligner(NucleoScoreMatrix(NucleoScoreType.IDENTITY))
+        self.aligner = PairAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.IDENTITY))
 
     def testNeedlemanWunsch(self):
         self.assertEqual(3, self.aligner.needle(self.seq1, self.seq2).score)

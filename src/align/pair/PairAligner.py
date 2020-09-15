@@ -22,7 +22,7 @@ class Pair:
 
 
 class PairAligner:
-    def __init__(self, score_matrix, match=1, mismatch=0, gap_open=0):
+    def __init__(self, **kwargs):
         """
         Pairwise aligner object constructor.
         :param score_matrix:    Scoring matrix for alignments.
@@ -30,10 +30,14 @@ class PairAligner:
         :param mismatch:        Mismatch penalty
         :param gap_open:        Gap penalty
         """
-        self.score_matrix = score_matrix
-        self.match = match
-        self.mismatch = mismatch
-        self.gap_open = gap_open
+        if "score_mat" in kwargs:
+            self.score_matrix = kwargs.get("score_mat")
+            self.match = kwargs.get("match", 1)
+            self.mismatch = kwargs.get("mismatch", 0)
+            self.gap_open = kwargs.get("gap_open", 0)
+            self.gap_extend = kwargs.get("gap_extend", 0)
+        else:
+            raise ValueError("PairAligner requires a ScoreMatrix during construction.")
 
     def needle(self, s1, s2):
         """

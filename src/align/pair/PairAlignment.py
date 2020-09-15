@@ -12,6 +12,8 @@ class PairAlignment:
         # Assign sequence data
         self.seq1, self.seq2, self.score = args
 
+        self.seq_type = self.seq1.seq_type
+
         # Length of longest sequence name
         self.len_longest_id = max(len(self.seq1.id), len(self.seq2.id))
 
@@ -26,13 +28,17 @@ class PairAlignment:
         # Calculate distance to 3 dp
         self.dist = round((mismatches/(no_gap if no_gap > 0 else 1) * 100), 3)
 
-        self.string = ""
-        self._form_string()
+        self.string = self._form_string()
 
     def _form_string(self):
-        self.string = ""
+        """
+        Forms a string to represent the alignment using pipes between like-bases.
+        :return: Aligned string
+        """
+        string = ""
         tab = '\t' if self.len_longest_id > 0 else ''
 
+        # Prefixes i.e. Seq IDs and tabbed spacing to ensure aligned seqs match up
         before_seq1 = self.seq1.id + ' ' * (self.len_longest_id - len(self.seq1.id)) + tab
         before_pipes = ' ' * self.len_longest_id + tab
         before_seq2 = self.seq2.id + ' ' * (self.len_longest_id - len(self.seq2.id)) + tab
@@ -53,16 +59,17 @@ class PairAlignment:
                 )
 
         for i in range(len(splits[0])):
-            self.string += ''.join(splits[0][i]) + "\n"
-            self.string += ''.join(splits[1][i]) + "\n"
-            self.string += ''.join(splits[2][i]) + "\n\n"
+            string += ''.join(splits[0][i]) + "\n"
+            string += ''.join(splits[1][i]) + "\n"
+            string += ''.join(splits[2][i]) + "\n\n"
+        return string
 
     def __str__(self):
-        tab = '\t' if self.len_longest_id > 0 else ''
         return self.string
 
     def __repr__(self):
-        pass
+        return f"Pairwise Alignment | Score: {self.score} | " \
+               f"Distance: {self.dist}%\n\n{self.string}"
 
     def __len__(self):
         return len(self.seq1)

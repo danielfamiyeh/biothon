@@ -16,6 +16,7 @@ class TestPairAlignment(unittest.TestCase):
 
     def testString(self):
         print(self.alignment)
+        print(repr(self.alignment))
 
     def testScore(self):
         self.assertEqual(self.score, self.alignment.score)
