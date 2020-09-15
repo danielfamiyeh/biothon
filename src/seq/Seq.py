@@ -153,16 +153,18 @@ class Seq:
             raise ValueError("Both sequences must be of same"
                              "length for point_mutations() method.")
 
-    def find_motif(self, subseq):
+    def find_motif(self, subseq, **kwargs):
         """
         Finds the indices where the subsequence given by subseq can be found.
         :param subseq:  Subsequence reprsenting motif.
         :return:        List of indices where motif can be found.
         """
+        overlap = kwargs.get("overlap", False)
         # Initialise empty list of indices
         indices = []
         # Iterate over sequence length wrt to substring length
-        for i in range(len(self) - (len(subseq) - 1)):
+        for i in range(0, len(self) - (len(subseq) - 1),
+                       1 if overlap else len(subseq)):
             # If substring found
             if self[i: i + len(subseq)] == subseq:
                 # Append index list
@@ -335,14 +337,17 @@ class Seq:
                             f"type.")
 
     def __repr__(self):
-        string = f"{self.name} | {self.seq_type}:\n"
-        string += "".join([f"{c}\n" if i > 0 and i % 60 == 0
-                           else c for i, c in enumerate(self)])
+        string = f"Seq({str(self)})"
+        string += "\n"
+        string += f"{self.id + '|' if len(self.id) > 0 else ''}" \
+                 f"{self.name + '|' if len(self.name) > 0 else ''}" \
+                 f"{self.desc if len(self.desc) > 0 else ''}"
+
         return string
 
     def __str__(self):
-        return self.seq
-
+        return "".join([f"{c}\n" if i > 0 and i % 60 == 0
+                           else c for i, c in enumerate(self)])
     def __invert__(self):
         if self.seq_type is SeqType.DNA:
             return Seq(''.join([_dna_complement[base] for base in self]),

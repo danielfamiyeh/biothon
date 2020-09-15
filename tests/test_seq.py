@@ -31,6 +31,9 @@ class TestSeq(unittest.TestCase):
     def testPointMutations(self):
         self.assertEqual(4, self.dna1.point_mutations(self.dna2))
 
+    def testGCContent(self):
+        self.assertEqual(100 * (5/9), self.dna1.gc_content())
+
     def testCount(self):
         count = self.dna1.count()
         self.assertEqual(2, count["A"])
@@ -65,8 +68,6 @@ class TestSeq(unittest.TestCase):
         transcribed = ''.join(["U" if base == "T" else base for base in self.dna1])
         spliced = "AUGAUA"
 
-        print(self.dna1)
-
         self.assertEqual(SeqType.RNA, self.dna1.seq_type)
         self.assertEqual(SeqType.RNA, self.dna2.seq_type)
 
@@ -98,11 +99,46 @@ class TestSeq(unittest.TestCase):
         self.assertEqual(translated, str(longer_rna))
         self.assertEqual(spliced, str(longer_dna))
 
-    def testPrint(self):
-        self.assertEqual(True, False)
+    def testFindMotif(self):
+        seq = Seq("AAAAAA")
+        self.assertEqual([0, 1, 2, 3], seq.find_motif("AAA", overlap=True))
+        self.assertEqual([0, 3], seq.find_motif("AAA"))
 
-    def testPrintFull(self):
-        self.assertEqual(True, False)
+    def testPrint(self):
+        self.dna1.id = "1234634"
+        self.dna1.name = "Name"
+        self.dna1.desc = "Short description of sequence."
+        repr_split = repr(self.dna1).split("\n")
+
+        self.assertEqual(str(self.dna1), self.dna_sequence1)
+        self.assertEqual("Seq("+self.dna_sequence1+")", repr_split[0])
+        self.assertEqual("1234634|Name|Short description of sequence.", repr_split[1])
+
+    def testMagicMethods(self):
+        # Iter test
+        for i, char in enumerate(self.dna1):
+            self.assertEqual(char, self.dna_sequence1[i])
+
+        # Concat test
+        self.assertEqual(self.dna_sequence1 + self.dna_sequence2,
+                         str(self.dna1 + self.dna2))
+
+        # Inplace concat test
+        self.dna1 += self.dna2
+        self.assertEqual(self.dna_sequence1 + self.dna_sequence2,
+                         str(self.dna1))
+
+        # Equality tests
+        self.assertEqual(self.dna1, self.dna1)
+        self.assertNotEqual(self.dna1, self.dna2)
+
+        # Length test
+        self.assertEqual(len(self.dna_sequence2), len(self.dna2))
+
+        # Getitem tests
+        self.assertEqual(self.dna_sequence1[4], self.dna1[4])
+        self.assertEqual(self.dna_sequence2[1:3], self.dna2[1:3])
+
 
 if __name__ == '__main__':
     unittest.main()
