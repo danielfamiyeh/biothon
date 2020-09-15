@@ -50,18 +50,59 @@ class TestSeq(unittest.TestCase):
         self.rna.comp()
 
     def testRevComp(self):
-        pass
+        dna_rev_comp = (~self.dna1)[::-1]
+        rna_rev_comp = (~self.rna)[::-1]
+
+        self.dna1.rev_comp()
+        self.rna.rev_comp()
+
+        self.assertEqual(dna_rev_comp, str(self.dna1))
+        self.assertEqual(rna_rev_comp, str(self.rna))
 
     def testScribe(self):
-        pass
+        self.dna1.scribe()
+        self.dna2.scribe("GTC")
+        transcribed = ''.join(["U" if base == "T" else base for base in self.dna1])
+        spliced = "AUGAUA"
+
+        print(self.dna1)
+
+        self.assertEqual(SeqType.RNA, self.dna1.seq_type)
+        self.assertEqual(SeqType.RNA, self.dna2.seq_type)
+
+        self.assertEqual(transcribed, str(self.dna1))
+        self.assertEqual(spliced, str(self.dna2))
 
     def testBackScribe(self):
-        pass
+        back_transcribed = ''.join(["T" if base == "U"
+                                    else base for base in self.rna])
+        self.rna.back_scribe()
+        self.assertEqual(SeqType.DNA, self.rna.seq_type)
+        self.assertEqual(back_transcribed, str(self.rna))
 
     def testSlate(self):
-        pass
+        translated = "MAMAPRTEINSTRING*"
+        spliced = "MMPRTEISTRIG"
+        longer_rna = Seq("AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA",
+                         SeqType.RNA)
+        longer_dna = Seq("AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA",
+                         SeqType.RNA)
+        longer_dna.back_scribe()
 
+        longer_dna.slate(True, "GCC", "GCG", "AAT", "AAC")
+        longer_rna.slate()
 
+        self.assertEqual(SeqType.PROTEIN, longer_rna.seq_type)
+        self.assertEqual(SeqType.PROTEIN, longer_dna.seq_type)
+
+        self.assertEqual(translated, str(longer_rna))
+        self.assertEqual(spliced, str(longer_dna))
+
+    def testPrint(self):
+        self.assertEqual(True, False)
+
+    def testPrintFull(self):
+        self.assertEqual(True, False)
 
 if __name__ == '__main__':
     unittest.main()

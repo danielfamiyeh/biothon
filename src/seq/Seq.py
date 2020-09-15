@@ -57,9 +57,9 @@ class SeqType(Enum):
     PROTEIN = 3
 
 
-_nucleo_complement = {"A": "T", "C": "G", "T": "A", "G": "C"}
+_dna_complement = {"A": "T", "C": "G", "T": "A", "G": "C"}
 _rna_complement = {"A": "U", "C": "G", "U": "A", "G": "C"}
-_nucleo_transition = {"A": "G", "C": "T", "G": "A", "T": "C"}
+_dna_transition = {"A": "G", "C": "T", "G": "A", "T": "C"}
 
 
 class Seq:
@@ -122,7 +122,7 @@ class Seq:
                 # If characters do not match
                 if self.seq[i] != seq[i]:
                     # Check if substitution is a transition
-                    if _nucleo_transition[self.seq[i]] == seq[i]:
+                    if _dna_transition[self.seq[i]] == seq[i]:
                         # If it is increment transition counter
                         transitions += 1
                     else:
@@ -215,7 +215,7 @@ class Seq:
 
         # Check that sequence is DNA or RNA
         if self.seq_type is SeqType.DNA:
-            self.seq = ''.join([_nucleo_complement[base] for base in self.seq])
+            self.seq = ''.join([_dna_complement[base] for base in self.seq])
         elif self.seq_type is SeqType.RNA:
             self.seq = ''.join(_rna_complement[base] for base in self.seq)
         else:
@@ -251,10 +251,13 @@ class Seq:
         if self.seq_type is SeqType.DNA:
             # Change sequence to RNA
             self.seq_type = SeqType.RNA
-            # For intron in args
-            for s in args:
-                # Splice intron
-                self.seq = self.seq.replace(s, "")
+            if len(args) > 0:
+                spliced = ""
+                for i in range(0, len(self)-2, 3):
+                    codon = self[i:i+3]
+                    spliced += "" if codon in args else codon
+
+                self.seq = spliced
             # Join spliced sequence
             self.seq = ''.join(["U" if base == "T" else base for base in self.seq])
         else:
@@ -341,9 +344,13 @@ class Seq:
         return self.seq
 
     def __invert__(self):
-        if self.seq_type is SeqType.DNA or self.seq_type is SeqType.RNA:
-            return Seq(''.join(["A" if base == "U" else _nucleo_complement[base]
-                                for base in self.seq]), self.seq_type)
+        if self.seq_type is SeqType.DNA:
+            return Seq(''.join([_dna_complement[base] for base in self]),
+                       self.seq_type, id=self.id, name=self.name, desc=self.desc)
+
+        elif self.seq_type is SeqType.RNA:
+            return Seq(''.join([_rna_complement[base] for base in self]),
+                       self.seq_type, id=self.id, name=self.name, desc=self.desc)
         else:
             raise TypeError("Sequence type must be DNA or RNA for complement "
                             "operator.")

@@ -46,7 +46,7 @@ class MarkovModel:
         total = 1000    # Total probability
         vec = [0 for _ in self.alpha]   # Probability vector with zeroes
 
-        # Iterate over sequence alphabet
+        # Iterate over length of sequence alphabet
         for i in range(len(self.alpha)):
             # Set proability based on amount left sequence type
             p = 0 if total <= 0 else randint(0, total) // (len(self.alpha) /

@@ -2,7 +2,7 @@ import unittest
 from src.matrix.ScoreMatrix import *
 from src.align.pair.PairAligner import *
 
-class TestPairAlignment(unittest.TestCase):
+class TestPairAligner(unittest.TestCase):
     def setUp(self):
         self.seq1 = Seq("TGGTG")
         self.seq2 = Seq("ATCGT")
