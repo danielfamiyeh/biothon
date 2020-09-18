@@ -1,8 +1,9 @@
-from math import ceil
+from math import ceil, inf
 from src.align.pair.PairAlignment import *
 from src.seq.Seq import *
 from collections import namedtuple
 from src.graph import Graph
+
 
 class Pair:
     def __init__(self, val):
@@ -11,14 +12,23 @@ class Pair:
         :param val: Value of entry in matrix.
         """
         self.val = val
-        self.pred = None    # Predecessor object reference
+        self.pred = None  # Predecessor object reference
 
     def __repr__(self):
         return str(self.val)
 
+    def __add__(self, other):
+        return self.val + other
+
     def __sub__(self, other):
         if isinstance(other, int):
             return self.val - other
+
+    def __le__(self, other):
+        return self.val <= other.val
+
+    def __lt__(self, other):
+        return self.val < other.val
 
 
 class PairAligner:
@@ -65,9 +75,18 @@ class PairAligner:
             # Traverse matrix and update scores
             for i in range(1, rows):
                 for j in range(1, cols):
-                    # Add indels
-                    scores = [(matrix[i][j-1]-self.gap_open),
-                              (matrix[i-1][j]-self.gap_open)]
+                    # Add indels 2 = X, 1 = Y, 0 = M
+                    x_affine = matrix[i][j - 1] - (
+                        self.gap_extend if matrix[i][j - 1].pred == 2
+                        else self.gap_open + self.gap_extend
+                    )
+
+                    y_affine = matrix[i - 1][j] - (
+                        self.gap_extend if matrix[i - 1][j].pred == 1
+                        else self.gap_open + self.gap_extend
+                    )
+                    scores = [(matrix[i][j - 1] - self.gap_open),
+                              (matrix[i - 1][j] - self.gap_open)]
 
                     # Add tentative match
                     tentative_match = matrix[i - 1][j - 1].val
@@ -164,11 +183,49 @@ class PairAligner:
                     score -= self.gap_open
 
             # Return new pair alignment object with correct directionality
-            return PairAlignment(aligned_s1[::-1], aligned_s2[::-1], score,
-                                 s1_name=s1.name, s2_name=s2.name)
+            return PairAlignment(
+                Seq(aligned_s1[::-1], s1.seq_type, id=s1.id, name=s1.name, desc=s1.desc),
+                Seq(aligned_s2[::-1], s2.seq_type, id=s2.id, name=s2.name, desc=s2.desc), score)
         else:
             # Throw type error
             raise TypeError("Params s1 and s2 must be of type Seq.")
+
+    def needle_affine(self, s1, s2):
+        rows = len(s1) + 1
+        cols = len(s2) + 1
+
+        m_matrix = [[0 if i == 0 and j == 0 else -inf for j in range(cols)]
+                    for i in range(rows)]
+
+        ix_matrix = [[-(self.gap_open + self.gap_extend * i) if j == 0 else -inf
+                      for j in range(cols)] for i in range(rows)]
+
+        iy_matrix = [[-(self.gap_open + self.gap_extend * j) if i == 0 else -inf
+                      for j in range(cols)] for i in range(rows)]
+
+        for i in range(1, rows):
+            for j in range(1, cols):
+                score = self.score_matrix.lookup(s1[i - 1], s2[j - 1])
+                m_matrix[i][j] = max([m_matrix[i - 1][j - 1] + score,
+                                      ix_matrix[i - 1][j - 1] + score,
+                                      iy_matrix[i - 1][j - 1] + score])
+
+                ix_matrix[i][j] = max([m_matrix[i - 1][j] - (self.gap_open + self.gap_extend),
+                                       iy_matrix[i - 1][j] - (self.gap_open + self.gap_extend),
+                                       ix_matrix[i - 1][j] - self.gap_extend])
+
+                iy_matrix[i][j] = max([m_matrix[i][j - 1] - (self.gap_open + self.gap_extend),
+                                       iy_matrix[i][j - 1] - self.gap_extend,
+                                      ix_matrix[i][j-1] - (self.gap_open + self.gap_extend)])
+
+        for row in m_matrix:
+            print(row)
+        print("\n")
+        for row in ix_matrix:
+            print(row)
+        print("\n")
+        for row in iy_matrix:
+            print(row)
 
     def smith(self, s1, s2):
         """
@@ -196,12 +253,12 @@ class PairAligner:
                 # Iterate over alignment matrix columns
                 for j in range(1, cols):
                     # And indel scores to score list
-                    scores = [(matrix[i][j-1] - self.gap_open), (matrix[i-1][j] - self.gap_open), 0]
+                    scores = [(matrix[i][j - 1] - self.gap_open), (matrix[i - 1][j] - self.gap_open), 0]
 
                     # Set tentative match to previous matches score
-                    tentative_match = matrix[i-1][j-1].val
+                    tentative_match = matrix[i - 1][j - 1].val
                     # Add score based on score matrix
-                    tentative_match += self.match if s1[i-1] == s2[j-1] else -self.mismatch
+                    tentative_match += self.match if s1[i - 1] == s2[j - 1] else -self.mismatch
                     # Add tentative match to first index of score list
                     scores.insert(0, tentative_match)
 
@@ -304,11 +361,10 @@ class PairAligner:
         for i in range(1, rows):
             matrix[1][0] = i * -self.gap_open
             for j in range(1, cols):
-
                 # Add indels to score list
                 scores = [(matrix[1][j - 1] - self.gap_open), (matrix[0][j] - self.gap_open)]
                 # Set tentative match to previous matches' score
-                tentative_match = matrix[0][j-1]
+                tentative_match = matrix[0][j - 1]
                 # Increment value of tentative match by match value
                 # TODO: Change to score matrix
                 tentative_match += self.match if s1[i - 1] == s2[j - 1] else -self.mismatch
@@ -452,7 +508,7 @@ class PairAligner:
             # For every character in query's alphabet
             for c in alpha:
                 # Initialise new k-word
-                kword = c + query[i+1:ktup]
+                kword = c + query[i + 1:ktup]
                 # Initialise query substring
                 query_sub = query[i:ktup]
 
@@ -487,7 +543,7 @@ class PairAligner:
                             # Exit loop
                             break
                         # Initialise match index
-                        match = seq[k: k+ktup].find(neighbour)
+                        match = seq[k: k + ktup].find(neighbour)
                         # If match between two sequences
                         if match != -1:
                             # Add indices of character match to seed hit
@@ -536,9 +592,9 @@ class PairAligner:
                             break
 
                         # If extensions result in a negative score break
-                        elif min(seed_hit[0] - left, seed_hit[2] - left) < 0 and\
-                            (seed_hit[2] + ktup + right > len(db[i]) or
-                             seed_hit[0] + ktup + right > len(query)):
+                        elif min(seed_hit[0] - left, seed_hit[2] - left) < 0 and \
+                                (seed_hit[2] + ktup + right > len(db[i]) or
+                                 seed_hit[0] + ktup + right > len(query)):
                             break
 
                         # Extend window
@@ -577,9 +633,9 @@ class PairAligner:
                 # Iterate over all runs
                 for r in runs:
                     # Get diagonal's index
-                    index = i-j
+                    index = i - j
                     # If index is within distance of diagonal
-                    if r-w <= index <= r+w:
+                    if r - w <= index <= r + w:
                         # We are bounded
                         bounded = True
 
@@ -682,13 +738,13 @@ class PairAligner:
 
         # Generates neighbourhood of k-words
         # Iterate over query sequence length wrt ktup
-        for i in range(len(query_seq) - (ktup-1)):
+        for i in range(len(query_seq) - (ktup - 1)):
             # If substring is not a key in query k-word map
-            if query_seq[i:i+ktup] not in query_kwords:
+            if query_seq[i:i + ktup] not in query_kwords:
                 # Add a new empty list with substring as a key
-                query_kwords[query_seq[i:i+ktup]] = []
+                query_kwords[query_seq[i:i + ktup]] = []
             # Add index to list
-            query_kwords[query_seq[i:i+ktup]].append(i)
+            query_kwords[query_seq[i:i + ktup]].append(i)
 
         # Iterate over db sequences
         for other in db_seq:
@@ -703,7 +759,7 @@ class PairAligner:
 
             # Generates k-words for database sequence
             # Iterate over db sequence length wrt ktp
-            for i in range(len(other) - (ktup-1)):
+            for i in range(len(other) - (ktup - 1)):
                 # If substring is not a key in other kwords map
                 if other[i:i + ktup] not in other_kwords:
                     # Add substr as key with empty list as value
@@ -724,18 +780,18 @@ class PairAligner:
                         for j in columns:
                             # If diag index is int present in
                             # common k-word map
-                            if i-j not in common_kwords:
+                            if i - j not in common_kwords:
                                 # Add it to map with value zero
-                                common_kwords[i-j] = 0
+                                common_kwords[i - j] = 0
                                 # Add index as tuple to diag_starts map
-                                diag_starts[i-j] = (i, j)
+                                diag_starts[i - j] = (i, j)
                             # Increment common k-word score
-                            common_kwords[i-j] += self.match
+                            common_kwords[i - j] += self.match
             # Order diagonals by score and store in list
             ordered_diags = sorted(common_kwords,
                                    key=common_kwords.get,
                                    reverse=True)[0:len(common_kwords) if
-                                   len(common_kwords) <= 10 else 10]
+            len(common_kwords) <= 10 else 10]
 
             # Dict comprehension by enumerating ordered_diags list
             ordered_diags = {d: ordered_diags for i, d in enumerate(ordered_diags)}
@@ -770,7 +826,7 @@ class PairAligner:
                         i = diag_starts[other_diag][0] - (diag_starts[diag][0] + score)
                         j = diag_starts[other_diag][1] - (diag_starts[diag][1] + score)
                         if i >= 0 and j >= 0:
-                            G.add_edge(diag, other_diag, -((i+j)*self.gap_open)//2)
+                            G.add_edge(diag, other_diag, -((i + j) * self.gap_open) // 2)
 
             # Solve chaining problem and store result
             chain = G.chaining()
@@ -779,13 +835,13 @@ class PairAligner:
             # Add scores to init_n list
             init_n.append([ordered_diags[i] for i in chain])
 
-        #TODO: PUT CODE HERE TO THRESHOLD INIT_N
+        # TODO: PUT CODE HERE TO THRESHOLD INIT_N
 
         # Enumerate chain list
         for i, run_list in enumerate(chain_n):
             # Append alignments to alignment list
             alignments.append(self._banded_sw(
-                                              run_list, query_seq, db_seq[i], w)
-                              )
+                run_list, query_seq, db_seq[i], w)
+            )
             # Return alignment list
         return alignments

@@ -13,7 +13,7 @@ def load(type_enum):
     filename = str(type_enum).split(".")[1].lower()
     folder = ''.join([c for c in filename if not c.isdigit()])
 
-    with open(f"{dir}\\{folder}\\{filename}.txt", "r") as matrix_file:
+    with open(f"{dir}\\..\\matrix\\{folder}\\{filename}.txt", "r") as matrix_file:
         keys = []
         mat = {}
         for i, line in enumerate(matrix_file):

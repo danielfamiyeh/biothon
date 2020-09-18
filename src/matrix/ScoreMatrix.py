@@ -1,5 +1,5 @@
 from enum import Enum
-from src.matrix.ScoreMatrixParser import *
+from src.parser.ScoreMatrixParser import *
 
 
 class _ScoreMatrix:

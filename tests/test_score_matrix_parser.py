@@ -1,7 +1,7 @@
 import unittest
 
 from src.matrix.ScoreMatrix import *
-from src.matrix import ScoreMatrixParser
+from src.parser import ScoreMatrixParser
 
 
 class ScoreMatrixParserTest(unittest.TestCase):

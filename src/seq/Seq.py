@@ -101,7 +101,6 @@ class Seq:
         self.label = ""  # For Guide/PhyloTree creation - Do not use.
         self.weight = 1  # For PhyloTree creation - Do not use.
 
-    # Class Methods
     def transit(self, seq):
         """
         Transition-Transversion ratio method.
@@ -335,6 +334,13 @@ class Seq:
             # Throw error if sequence is not translatable
             raise TypeError(f"{self.seq_type} is not a translatable sequence "
                             f"type.")
+
+    def copy(self):
+        return Seq(self.seq, self.seq_type, id=self.id,
+                   name=self.name, desc=self.desc)
+
+    def set_seq(self, seq):
+        self.seq = seq
 
     def __repr__(self):
         string = f"Seq({str(self)})"
