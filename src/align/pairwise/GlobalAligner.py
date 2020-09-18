@@ -1,4 +1,3 @@
-from src.helper.RecRelation import *
 from src.align.pairwise.PairAlgo import *
 
 
