@@ -1,6 +1,7 @@
 from math import inf
 from enum import Enum
 
+
 class _Ptr(Enum):
     """
     Pointer for traceback algorithm
@@ -8,6 +9,7 @@ class _Ptr(Enum):
     DIAG = 0
     UP = 1
     LEFT = 2
+    NULL = 3
 
 
 class PairAlgo:
@@ -24,7 +26,6 @@ class PairAlgo:
             tb:     Traceback condition tuple
         """
 
-        # Score matrix is preferred over match value
         self.score_mat = kwargs.get("score_mat")
 
         # For affine gap penalty
@@ -40,7 +41,7 @@ class PairAlgo:
     def align(self, s, t):
         rows = len(s) + 1
         cols = len(t) + 1
-        scores = {"d": self.gap_open, "e": self.gap_extend}
+        scores = {"n": 0, "d": self.gap_open, "e": self.gap_extend}
 
         matrices = {}
         for i, name in enumerate(self.matrix_names):
@@ -65,13 +66,20 @@ class PairAlgo:
         for i in range(1, rows):
             for j in range(1, cols):
                 scores["s"] = self.score_mat.lookup(s[i-1], t[j-1])
-                rr_values = []
+                rr_dict = {}
                 for r in self.r_relations:
-                    rr_values.append(matrices[r[0]][i + r[1]][j + r[2]]
-                                     + scores[r[3]])
-                argmax = max(rr_values)
-                matrices[self.matrix_names[0]][i][j] = argmax
-                tb_matrix[i][j] = _Ptr(rr_values.index(argmax))
+                    if r[0] not in rr_dict:
+                        rr_dict[r[0]] = []
+                    if len(r) > 2:
+                        rr_dict[r[0]].append(matrices[r[1]][i + r[2]][j + r[3]] + scores[r[4]])
+                    else:
+                        rr_dict[r[0]].append(r[1])
+
+                for matrix, values in rr_dict.items():
+                    argmax = max(values)
+                    matrices[matrix][i][j] = argmax
+                    if matrix == self.matrix_names[0]:
+                        tb_matrix[i][j] = _Ptr(values.index(argmax))
 
         for row in matrices[self.matrix_names[0]]:
             print(row)

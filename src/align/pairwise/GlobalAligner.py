@@ -1,3 +1,4 @@
+from src.helper.RecRelation import *
 from src.align.pairwise.PairAlgo import *
 
 
@@ -5,7 +6,7 @@ def _get_opt(matrix):
     return len(matrix)-1, len(matrix[0])-1
 
 
-class Needle(PairAlgo):
+class GlobalAligner(PairAlgo):
     """
     Needleman-Wunsch aligner
     """
@@ -18,9 +19,10 @@ class Needle(PairAlgo):
         gap = kwargs.get("gap")
 
         # Recurrence Relations
-        r_relations = (("M", -1, -1, "s"),
-                       ("M", -1, 0, "d"),
-                       ("M", 0, -1, "d"))
+        r_relations = (("M", "M", -1, -1, "s"),
+                       ("M", "M", -1, 0, "d"),
+                       ("M", "M", 0, -1, "d"),
+                       ("M", 0))
 
         # Boundary conditions
         b_conditions = [("M", lambda i: gap * i,
