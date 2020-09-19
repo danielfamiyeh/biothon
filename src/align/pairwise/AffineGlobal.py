@@ -14,13 +14,25 @@ class AffineGlobal(PairAlgo):
         gap_extend = kwargs.get("gap_extend", -1)
         b_conditions = [("M", lambda i: gap_open + i*gap_extend,
                          lambda j: gap_open + j*gap_extend)]
-
         r_relations = {
-            "F": [("M", -1, -1, "s")],
-            "G": [("M", -1, 0, "d"), ("G", -1, 0, "e")],
-            "H": [("M", 0, -1, "d"), ("H", 0, -1, "e")],
-            "M": [("F", 0, 0, "n"), ("G", 0, 0, "n"), ("H", 0, 0, "n")]
+            "F": [RecurrenceRelation(maps_from="M", i=-1, j=-1, score="s")],
+
+            "G": [RecurrenceRelation(maps_from="M", i=-1, j=0, score="d"),
+                  RecurrenceRelation(maps_from="G", i=-1, j=0, score="e")],
+
+            "H": [RecurrenceRelation(maps_from="M", i=0, j=-1, score="d"),
+                  RecurrenceRelation(maps_from="H", i=0, j=-1, score="e")],
+
+            "M": [RecurrenceRelation(maps_from="F", i=0, j=0, score="n"),
+                  RecurrenceRelation(maps_from="G", i=0, j=0, score="n"),
+                  RecurrenceRelation(maps_from="H", i=0, j=0, score="n")]
         }
+    #    r_relations = {
+     #       "F": [("M", -1, -1, "s")],
+      #      "G": [("M", -1, 0, "d"), ("G", -1, 0, "e")],
+       #     "H": [("M", 0, -1, "d"), ("H", 0, -1, "e")],
+        #    "M": [("F", 0, 0, "n"), ("G", 0, 0, "n"), ("H", 0, 0, "n")]
+        #}
 
         _kwargs = {"score_mat": kwargs.get("score_mat"),
                    "mat": ("M", "F", "G", "H"),

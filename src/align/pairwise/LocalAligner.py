@@ -1,4 +1,6 @@
 from src.align.pairwise.PairAlgo import *
+from src.align.pairwise.RecurrenceRelation import *
+
 
 def _get_opt(matrix):
     max_i, max_j, argmax = 0, 0, -inf
@@ -22,10 +24,16 @@ class LocalAligner(PairAlgo):
         gap = kwargs.get("gap")
 
         # Recurrence Relations
-        r_relations = (("M", "M", -1, -1, "s"),
-                       ("M", "M", -1, 0, "d"),
-                       ("M", "M", 0, -1, "d"),
-                       ("M", 0))
+        r_relations = {
+            "M": [RecurrenceRelation(maps_from="M", i=-1, j=-1, score="s"),
+                  RecurrenceRelation(maps_from="M", i=-1, j=0, score="d"),
+                  RecurrenceRelation(maps_from="M", i=0, j=-1, score="d"),
+                  RecurrenceRelation()]
+        }
+     #   r_relations = (("M", "M", -1, -1, "s"),
+      #                 ("M", "M", -1, 0, "d"),
+       #                ("M", "M", 0, -1, "d"),
+        #               ("M", 0))
 
         # Boundary conditions
         b_conditions = [("M", lambda i: 0, lambda j: 0)]

@@ -324,7 +324,7 @@ class Seq:
                     if stop_codon and amino_index == -1:
                         break
 
-                    # Add protein to polypeptide chain
+                    # Add amino acid to polypeptide chain
                     chain += alphabet_protein_1[amino_index]
                     # Clear codon list
                     codon.clear()

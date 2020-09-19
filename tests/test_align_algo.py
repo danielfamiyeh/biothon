@@ -27,11 +27,11 @@ class TestAlignAlgo(unittest.TestCase):
                                gap=-2)
 
 
-       # needle_aligner.align("AAAC", "AGC")
+        needle_aligner.align("CAT", "CARTS")
 
         local_aligner = LocalAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM),
                                gap=-2)
-      #  local_aligner.align("TTAAG", "AAGA")
+        local_aligner.align("TTAAG", "AAGA")
 
         affine_global = AffineGlobal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
         affine_global.align("CAT", "CARTS")

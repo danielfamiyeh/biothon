@@ -18,10 +18,13 @@ class GlobalAligner(PairAlgo):
         gap = kwargs.get("gap")
 
         # Recurrence Relations
-        r_relations = (("M", "M", -1, -1, "s"),
-                       ("M", "M", -1, 0, "d"),
-                       ("M", "M", 0, -1, "d"),
-                       ("M", 0))
+        r_relations = {"M": [RecurrenceRelation(maps_from="M", i=-1, j=-1, score="s"),
+                             RecurrenceRelation(maps_from="M", i=-1, j=0, score="d"),
+                             RecurrenceRelation(maps_from="M", i=0, j=-1, score="d")]}
+      #  r_relations = {"M": [("M", -1, -1, "s"),
+       #                ("M", -1, 0, "d"),
+        #               ("M", 0, -1, "d"),
+         #              ("M", 0)]}
 
         # Boundary conditions
         b_conditions = [("M", lambda i: gap * i,

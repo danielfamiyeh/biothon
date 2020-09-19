@@ -1,6 +1,6 @@
 from math import inf
 from enum import Enum
-
+from src.align.pairwise.RecurrenceRelation import *
 
 class _Ptr(Enum):
     """
@@ -71,10 +71,18 @@ class PairAlgo:
                 for key, rel_list in self.r_relations.items():
                     rr_values = []
                     for r in rel_list:
-                        if len(r) > 2:
-                            rr_values.append(matrices[r[0]][i + r[1]][j + r[2]] + scores[r[3]])
+                        indices = r.get_indices(i, j)
+                        if indices == 0:
+                            rr_values.append(0)
+                        elif indices == -1:
+                            continue
                         else:
-                            rr_values.append(r[1])
+                            rr_values.append(matrices[r.maps_from][indices[0]][indices[1]]
+                                         + scores[r.score])
+                      #  if len(r) > 2:
+                       #     rr_values.append(matrices[r[0]][i + r[1]][j + r[2]] + scores[r[3]])
+                        #else:
+                        #    rr_values.append(r[1])
                     argmax = max(rr_values)
                     matrices[key][i][j] = argmax
                     if key == self.matrix_names[0]:
