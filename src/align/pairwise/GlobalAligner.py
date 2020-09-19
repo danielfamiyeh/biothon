@@ -21,10 +21,6 @@ class GlobalAligner(PairAlgo):
         r_relations = {"M": [RecurrenceRelation(maps_from="M", i=-1, j=-1, score="s"),
                              RecurrenceRelation(maps_from="M", i=-1, j=0, score="d"),
                              RecurrenceRelation(maps_from="M", i=0, j=-1, score="d")]}
-      #  r_relations = {"M": [("M", -1, -1, "s"),
-       #                ("M", -1, 0, "d"),
-        #               ("M", 0, -1, "d"),
-         #              ("M", 0)]}
 
         # Boundary conditions
         b_conditions = [("M", lambda i: gap * i,
@@ -33,6 +29,7 @@ class GlobalAligner(PairAlgo):
         _kwargs = {"score_mat": kwargs.get("score_mat"),
                    "mat": tuple("M"),
                    "bound": b_conditions,
+                   "banded": kwargs.get("banded", (inf, inf)),
                    "rec": r_relations,
                    "gap_open": gap,
                    "get_opt": _get_opt,

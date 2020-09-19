@@ -1,11 +1,7 @@
 import unittest
 
-from src.align.pairwise.AffineGlobal import AffineGlobal
-from src.align.pairwise.PairAlgo import *
-from src.align.pairwise.GlobalAligner import *
 from src.align.pairwise import *
 from src.matrix.ScoreMatrix import *
-
 
 class TestAlignAlgo(unittest.TestCase):
     def test_boundary_conditions(self):
@@ -25,8 +21,6 @@ class TestAlignAlgo(unittest.TestCase):
 
         needle_aligner = GlobalAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM),
                                gap=-2)
-
-
         needle_aligner.align("CAT", "CARTS")
 
         local_aligner = LocalAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM),
@@ -36,8 +30,8 @@ class TestAlignAlgo(unittest.TestCase):
         affine_global = AffineGlobal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
         affine_global.align("CAT", "CARTS")
 
-    def test_local_aligner(self):
-        pass
+        affine_local = AffineLocal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
+        affine_local.align("TTAAG", "AAGA")
 
 
 if __name__ == '__main__':

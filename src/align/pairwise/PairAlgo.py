@@ -32,6 +32,7 @@ class PairAlgo:
         self.gap_open = kwargs.get("gap_open", -1)
         self.gap_extend = kwargs.get("gap_extend", 0)
 
+        self.banded = kwargs.get("banded")
         self.boundary_conditions = kwargs.get("bound")
         self.matrix_names = kwargs.get("mat")
         self.r_relations = kwargs.get("rec")
@@ -65,42 +66,25 @@ class PairAlgo:
 
         for i in range(1, rows):
             for j in range(1, cols):
-                scores["s"] = self.score_mat.lookup(s[i-1], t[j-1])
-                rr_dict = {}
+                if abs(i-j) < (self.banded[0] + self.banded[1]):
+                    scores["s"] = self.score_mat.lookup(s[i-1], t[j-1])
 
-                for key, rel_list in self.r_relations.items():
-                    rr_values = []
-                    for r in rel_list:
-                        indices = r.get_indices(i, j)
-                        if indices == 0:
-                            rr_values.append(0)
-                        elif indices == -1:
-                            continue
-                        else:
-                            rr_values.append(matrices[r.maps_from][indices[0]][indices[1]]
-                                         + scores[r.score])
-                      #  if len(r) > 2:
-                       #     rr_values.append(matrices[r[0]][i + r[1]][j + r[2]] + scores[r[3]])
-                        #else:
-                        #    rr_values.append(r[1])
-                    argmax = max(rr_values)
-                    matrices[key][i][j] = argmax
-                    if key == self.matrix_names[0]:
-                        tb_matrix[i][j] = _Ptr(rr_values.index(argmax))
+                    for key, rel_list in self.r_relations.items():
+                        rr_values = []
+                        for r in rel_list:
+                            indices = r.get_indices(i, j)
+                            if indices == -1:
+                                continue
+                            elif indices == 0:
+                                rr_values.append(0)
+                            else:
+                                rr_values.append(matrices[r.maps_from][indices[0]][indices[1]]
+                                                 + scores[r.score])
 
-   #             for r in self.r_relations:
-    #                if r[0] not in rr_dict:
-     #                   rr_dict[r[0]] = []
-      #              if len(r) > 2:
-       #                 rr_dict[r[0]].append(matrices[r[1]][i + r[2]][j + r[3]] + scores[r[4]])
-        #            else:
-         #               rr_dict[r[0]].append(r[1])
-
-         #       for matrix, values in rr_dict.items():
-          #          argmax = max(values)
-           #         matrices[matrix][i][j] = argmax
-            #        if matrix == self.matrix_names[0]:
-             #           tb_matrix[i][j] = _Ptr(values.index(argmax))
+                        argmax = max(rr_values)
+                        matrices[key][i][j] = argmax
+                        if key == self.matrix_names[0]:
+                            tb_matrix[i][j] = _Ptr(rr_values.index(argmax))
 
         for name in self.matrix_names:
             print(name)
