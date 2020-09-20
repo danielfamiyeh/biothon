@@ -25,22 +25,22 @@ class TestAlignAlgo(unittest.TestCase):
         needle_aligner.align(Seq("CAT", SeqType.STRING), Seq("CARTS", SeqType.STRING))
 
         print(needle_aligner.align(Seq("ATACGGTAGCTTCATTATCGGCTAGGCTGTACACACGGTATAACAGAGGTAGGAGCTCGGCTGAGAGTTTTGCAGT",
-                                       name="Jaykwonronda"),
-                                    Seq("ATATATATAGGCGAGTCGAGATAGGCGCGTGATACACAGAATAGGCGGCTCAG", name="Ty-esha")))
+                                       id="Jaykwonronda"),
+                                    Seq("ATATATATAGGCGAGTCGAGATAGGCGCGTGATACACAGAATAGGCGGCTCAG", id="Ty-esha")))
 
         local_aligner = LocalAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM),
                                gap=-2)
         local_aligner.align(Seq("TTAAG"), Seq("AAGA"))
 
         affine_global = AffineGlobal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
-        affine_global.align(Seq("CAT", SeqType.STRING), Seq("CARTS", SeqType.STRING))
+        print(affine_global.align(Seq("CAT", SeqType.STRING), Seq("CARTS", SeqType.STRING)))
 
         affine_local = AffineLocal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
-        affine_local.align(Seq("TTAAG"), Seq("AAGA"))
+        print(affine_local.align(Seq("TTAAG"), Seq("AAGA")))
 
         overlap_detect = OverlapDetector(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
-        print(overlap_detect.align(Seq("TATCCGATAGCTGGTAC", name="jaykwon"), Seq("GATAGC",
-                                                                                 name="daykwanda")))
+        print(overlap_detect.align(Seq("TATCCGATAGCTGGTAC", id="jaykwon"), Seq("GATAGC",
+                                                                                 id="daykwanda")))
 
 
 if __name__ == '__main__':

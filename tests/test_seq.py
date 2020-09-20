@@ -117,6 +117,12 @@ class TestSeq(unittest.TestCase):
         self.assertEqual("Seq("+self.dna_sequence1+")", repr_split[0])
         self.assertEqual("1234634|Name|Short description of sequence.", repr_split[1])
 
+    def testSplit(self):
+        split_seqs = self.dna1.split("G")
+        self.assertEqual("ATCC", split_seqs[0].seq)
+        self.assertEqual("C", split_seqs[1].seq)
+        self.assertEqual("TA", split_seqs[2].seq)
+
     def testMagicMethods(self):
         # Iter test
         for i, char in enumerate(self.dna1):

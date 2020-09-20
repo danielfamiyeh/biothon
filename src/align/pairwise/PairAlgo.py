@@ -109,6 +109,7 @@ class PairAlgo:
 
         # Get indices of optimal score
         i, j = self.get_opt(matrices[self.matrix_names[0]])
+        score = matrices[self.matrix_names[0]][i][j]
         # Initialise alignment strings to blank strings
         aligned_s, aligned_t, pipes = [], [], []
 
@@ -154,4 +155,4 @@ class PairAlgo:
         aligned_seq2 = t.copy()
         aligned_seq2.set_seq("".join(aligned_t))
 
-        return PairAlign(aligned_seq1, aligned_seq2, pipes)
+        return PairAlign(aligned_seq1, aligned_seq2, pipes, score)

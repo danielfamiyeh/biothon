@@ -1,5 +1,5 @@
 from functools import reduce
-
+from src.seq.Seq import *
 
 class MSAProfile:
     def __init__(self, seq, score_matrix):
