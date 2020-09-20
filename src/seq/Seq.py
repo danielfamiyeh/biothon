@@ -342,6 +342,13 @@ class Seq:
     def set_seq(self, seq):
         self.seq = seq
 
+    def split(self, delimiter=""):
+        split_seq_data = self.seq.split(delimiter)
+        split_seqs = [Seq(seq_data, self.seq_type, id=self.id,
+                          name=self.name, desc=self.desc)
+                      for seq_data in split_seq_data]
+        return split_seqs
+
     def __repr__(self):
         string = f"Seq({str(self)})"
         string += "\n"

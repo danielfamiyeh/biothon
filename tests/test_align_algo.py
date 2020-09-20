@@ -1,5 +1,6 @@
 import unittest
 
+from src.seq.Seq import *
 from src.align.pairwise import *
 from src.matrix.ScoreMatrix import *
 
@@ -21,17 +22,25 @@ class TestAlignAlgo(unittest.TestCase):
 
         needle_aligner = GlobalAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM),
                                gap=-2)
-        needle_aligner.align("CAT", "CARTS")
+        needle_aligner.align(Seq("CAT", SeqType.STRING), Seq("CARTS", SeqType.STRING))
+
+        print(needle_aligner.align(Seq("ATACGGTAGCTTCATTATCGGCTAGGCTGTACACACGGTATAACAGAGGTAGGAGCTCGGCTGAGAGTTTTGCAGT",
+                                       name="Jaykwonronda"),
+                                    Seq("ATATATATAGGCGAGTCGAGATAGGCGCGTGATACACAGAATAGGCGGCTCAG", name="Ty-esha")))
 
         local_aligner = LocalAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM),
                                gap=-2)
-        local_aligner.align("TTAAG", "AAGA")
+        local_aligner.align(Seq("TTAAG"), Seq("AAGA"))
 
         affine_global = AffineGlobal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
-        affine_global.align("CAT", "CARTS")
+        affine_global.align(Seq("CAT", SeqType.STRING), Seq("CARTS", SeqType.STRING))
 
         affine_local = AffineLocal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
-        affine_local.align("TTAAG", "AAGA")
+        affine_local.align(Seq("TTAAG"), Seq("AAGA"))
+
+        overlap_detect = OverlapDetector(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
+        print(overlap_detect.align(Seq("TATCCGATAGCTGGTAC", name="jaykwon"), Seq("GATAGC",
+                                                                                 name="daykwanda")))
 
 
 if __name__ == '__main__':

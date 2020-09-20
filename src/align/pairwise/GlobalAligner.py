@@ -15,7 +15,7 @@ class GlobalAligner(PairAlgo):
             gap: (int) Gap penalty
             score_mat: (ScoreMatrix) Substitution matrix
         """
-        gap = kwargs.get("gap")
+        gap = kwargs.get("gap", -1)
 
         # Recurrence Relations
         r_relations = {"M": [RecurrenceRelation(maps_from="M", i=-1, j=-1, score="s"),
