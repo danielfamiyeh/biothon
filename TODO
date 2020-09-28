@@ -1,0 +1,10 @@
+Solve weighting in ClustalW
+Remove magic numbers
+Reading score matrices
+Threshold in FASTA
+Change tentative match in hirschbergs to score matrix
+Descriptive variable names
+Infinite loops
+Better FileIO
+Seq Refactoring
+Copyrighting Code
