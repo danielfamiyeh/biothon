@@ -1,4 +1,4 @@
-from src.align.pair import *
+from src.align.pairwise.AffineGlobal import *
 
 
 class Node:
@@ -176,7 +176,7 @@ class GuideTree:
         Constructs stringed, nested-tuple representation.
         :return: None
         """
-        aligner = PairAligner(self.mat)
+        aligner = AffineGlobal(score_mat=self.mat)
 
         # Initialise tuple with highest distance = -1 and blank IDs
         #   highest[0]: distance = -1
@@ -193,7 +193,7 @@ class GuideTree:
                 # (in a distance matrix)
                 if int(d) > i:
                     # Calculate distance using NW
-                    dist = aligner.needle(self.seqs[int(t)], self.seqs[int(d)]).dist
+                    dist = aligner.align(self.seqs[int(t)], self.seqs[int(d)]).dist
                     # Assign distances to taxon pair
                     self.taxa[t].dists[d] = dist
                     self.taxa[d].dists[t] = dist
