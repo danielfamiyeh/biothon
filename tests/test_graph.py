@@ -6,217 +6,96 @@ from src.graph.Graph import *
 class TestGraph(unittest.TestCase):
     def setUp(self):
         self.graph = Graph()
-        self.vertex_names = ["A", "B", "C"]
-        self.e1 = 2
-        self.e2 = -3
-        self.e3 = 3.25
-        self.vertex_count = 0
 
-    def testConstructor(self):
-        self.assertEqual(self.vertex_count,
-                         self.graph.num_vertices)
+    def test_add_vertex(self):
+        self.graph.add_vertex("A")
+        self.graph.add_vertex(1)
 
-    def testAddVertex(self):
-        for name in self.vertex_names:
-            self.graph.add_vertex(name)
-            self.vertex_count += 1
+        self.assertTrue("A" in self.graph.g)
+        self.assertTrue(1 in self.graph.g)
+        self.assertFalse(-3 in self.graph.g)
 
-            self.assertEqual(self.vertex_count,
-                             self.graph.num_vertices)
-            self.assertTrue(name in self.graph.get_vertices())
-            self.assertTrue(self.graph.vertex_exists(name))
+    def test_add_vertices(self):
+        self.graph.add_vertices("A", 0, "loool", -3)
+        self.assertIn("A", self.graph.g)
+        self.assertIn(0, self.graph.g)
+        self.assertIn("loool", self.graph.g)
+        self.assertIn(-3, self.graph.g)
 
-    def testVertexExists(self):
-        self.graph.add_vertex(self.vertex_names[0])
-        self.assertTrue(self.graph.vertex_exists(
-            self.vertex_names[0]
-        ))
+    def test_exists(self):
+        self.graph.add_vertex("node")
+        self.assertTrue(self.graph.exists("node"))
+        self.assertFalse(self.graph.exists(1))
 
-    def testAddEdge(self):
-        for name in self.vertex_names:
-            self.graph.add_vertex(name)
+    def test_add_edge(self):
+        self.graph.add_vertex("A")
+        self.graph.add_vertex("B")
+        self.graph.add_vertex("C")
 
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[1], self.e1, True)
-        self.graph.add_edge(self.vertex_names[1],
-                            self.vertex_names[2], self.e2, True)
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[2], self.e3, False)
+        self.graph.add_edge("A", "B")
+        self.graph.add_edge("C", "A", -1, True)
 
-        vertices = self.graph.get_vertices()
-        self.assertTrue(self.vertex_names[1] in
-                        vertices[self.vertex_names[0]].edges)
-        self.assertTrue(self.vertex_names[2] in
-                        vertices[self.vertex_names[1]].edges)
-        self.assertTrue(self.vertex_names[2] in
-                        vertices[self.vertex_names[0]].edges and
-                        self.vertex_names[0] in
-                        vertices[self.vertex_names[2]].edges)
+        self.assertIn("B",
+                      self.graph.g["A"].edges)
+        self.assertIn("A",
+                      self.graph.g["B"].edges)
+        self.assertIn("A",
+                      self.graph.g["C"].edges)
+        self.assertNotIn("C",
+                         self.graph.g["A"].edges)
 
-    def testAdjacent(self):
-        for name in self.vertex_names:
-            self.graph.add_vertex(name)
+    def test_adjacent(self):
+        self.graph.add_vertex("A")
+        self.graph.add_vertex("B")
+        self.graph.add_vertex("C")
 
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[1], self.e1, True)
-        self.graph.add_edge(self.vertex_names[1],
-                            self.vertex_names[2], self.e2, True)
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[2], self.e3, False)
+        self.graph.add_edge("A", "B")
+        self.graph.add_edge("C", "A", 0, True)
 
-        self.assertTrue(self.graph.adjacent(
-            self.vertex_names[0], self.vertex_names[1]
-        ))
-        self.assertTrue(self.graph.adjacent(
-            self.vertex_names[1], self.vertex_names[2]
-        ))
-        self.assertFalse(self.graph.adjacent(
-            self.vertex_names[1], self.vertex_names[0]
-        ))
-        self.assertFalse(self.graph.adjacent(
-            self.vertex_names[2], self.vertex_names[1]
-        ))
-        self.assertTrue(self.graph.adjacent(
-            self.vertex_names[0], self.vertex_names[2]
-        ))
-        self.assertTrue(self.graph.adjacent(
-            self.vertex_names[2], self.vertex_names[0]
-        ))
+        self.assertTrue(self.graph.adjacent("A", "B"))
+        self.assertTrue(self.graph.adjacent("B", "A"))
+        self.assertTrue(self.graph.adjacent("C", "A"))
+        self.assertFalse(self.graph.adjacent("A", "C"))
 
-    def testNeighbours(self):
-        for name in self.vertex_names:
-            self.graph.add_vertex(name)
+    def test_neighbors(self):
+        self.graph.add_vertex("A")
+        self.graph.add_vertex("B")
+        self.graph.add_vertex("C")
 
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[1], self.e1, True)
-        self.graph.add_edge(self.vertex_names[1],
-                            self.vertex_names[2], self.e2, True)
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[2], self.e3, False)
+        self.graph.add_edge("A", "B")
+        self.graph.add_edge("B", "C")
+        self.graph.add_edge("C", "A", 0, True)
 
-        v1_neighbours = self.graph.neighbours(
-            self.vertex_names[0]
-        )
+        self.assertIn("C", self.graph.neighbours("B"))
+        self.assertIn("A", self.graph.neighbours("B"))
 
-        v2_neighbours = self.graph.neighbours(
-            self.vertex_names[1]
-        )
+    def test_glue(self):
+        other_graph = Graph(["A", "C", "D"])
+        self.graph.add_vertices("A", "B", "C")
 
-        v3_neighbours = self.graph.neighbours(
-            self.vertex_names[2]
-        )
+        other_graph.add_edge("A", "C", 3)
 
-        self.assertTrue(
-            self.vertex_names[1] in v1_neighbours and
-            self.vertex_names[2] in v1_neighbours and
-            not self.vertex_names[0] in v1_neighbours
-        )
+        self.graph.add_edge("A", "B", 2)
+        self.graph.add_edge("A", "C", -1)
 
-        self.assertTrue(
-            self.vertex_names[2] in v2_neighbours and
-            not (self.vertex_names[0] in v2_neighbours and
-                 self.vertex_names[1] in v2_neighbours)
-        )
+        glued_graph = self.graph + other_graph
 
-        self.assertTrue(
-            self.vertex_names[0] in v3_neighbours and
-            not (self.vertex_names[2] in v3_neighbours and
-                 self.vertex_names[1] in v3_neighbours)
-        )
+        self.assertIn("e:3", str(glued_graph.g["A"].edges["C"]))
+        self.assertIn("e:-1", str(glued_graph.g["A"].edges["C"]))
 
-    def testRemoveVertex(self):
-        for name in self.vertex_names:
-            self.graph.add_vertex(name)
+        # In-place
+        self.graph += other_graph
+        self.assertIn("e:3", str(self.graph.g["A"].edges["C"]))
+        self.assertIn("e:-1", str(self.graph.g["A"].edges["C"]))
 
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[1], self.e1, True)
-        self.graph.add_edge(self.vertex_names[1],
-                            self.vertex_names[2], self.e2, True)
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[2], self.e3, False)
+    def test_euler_circuit(self):
+        self.graph.add_vertices("A", "B", "C", "D", "E", "F", "G")
+        self.graph.add_edges([("G", "A"), ("A", "B"), ("B", "C"),
+                              ("B", "G"), ("G", "E"), ("C", "G"),
+                              ("E", "F"), ("E", "D"), ("D", "B"),
+                              ("F", "D")])
 
-        self.graph.remove_vertex(self.vertex_names[0])
-
-        self.assertFalse(self.graph.vertex_exists(
-            self.vertex_names[0]
-        ))
-
-        vertices = self.graph.get_vertices()
-
-        for vertex in vertices:
-            self.assertFalse(self.vertex_names[0] in vertices[vertex].edges)
-
-    def testRemoveEdge(self):
-        self.graph.add_vertex(self.vertex_names[0])
-        self.graph.add_vertex(self.vertex_names[1])
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[1], 3)
-
-        self.graph.remove_edge(self.vertex_names[0],
-                               self.vertex_names[1])
-
-        self.assertFalse(self.graph.adjacent(self.vertex_names[0],
-                                             self.vertex_names[1]))
-
-    def testGetVertexValue(self):
-        for i, name in enumerate(self.vertex_names):
-            self.graph.add_vertex(name, i * (-1 if i % 2 == 0 else 1))
-        self.assertEqual(0, self.graph.get_vertex_value(
-            self.vertex_names[0]
-        ))
-
-        self.assertEqual(1, self.graph.get_vertex_value(
-            self.vertex_names[1]
-        ))
-
-        self.assertEqual(-2, self.graph.get_vertex_value(
-            self.vertex_names[2]
-        ))
-
-    def testSetVertexValue(self):
-        for i, name in enumerate(self.vertex_names):
-            self.graph.add_vertex(name, i * (-1 if i % 2 == 0 else 1))
-
-        for i, name in enumerate(self.vertex_names):
-            self.graph.set_vertex_value(name, 3-i)
-            self.assertEqual(3-i, self.graph.get_vertex_value(name))
-
-    def testGetEdgeValue(self):
-        self.graph.add_vertex(self.vertex_names[0])
-        self.graph.add_vertex(self.vertex_names[1])
-        self.graph.add_edge(self.vertex_names[0],
-                       self.vertex_names[1], 3)
-        self.assertEqual(3, self.graph.get_edge_value(
-            self.vertex_names[0], self.vertex_names[1]
-        ))
-
-    def testSetEdgeValue(self):
-        '''
-        Tests that an edge that exists between two vertices
-            in the graph can have its' value changed.
-        '''
-        self.graph.add_vertex(self.vertex_names[0])
-        self.graph.add_vertex(self.vertex_names[1])
-        self.graph.add_edge(self.vertex_names[0],
-                            self.vertex_names[1], -7)
-
-        self.graph.set_edge_value(self.vertex_names[0],
-                                  self.vertex_names[1], 4)
-
-        self.assertEqual(4, self.graph.get_edge_value(self.vertex_names[0],
-                                                      self.vertex_names[1]))
-
-    def testTopologicalSort(self):
-        '''
-        Topological sort test using example from
-            geeksforgeeks.org
-        '''
-
-    def testChainingSolver(self):
-        '''
-        ClustalW chaining problem solver test
-        '''
-        self.assertEqual(True, False)
+        self.graph.euler_circuit()
 
 if __name__ == '__main__':
     unittest.main()
