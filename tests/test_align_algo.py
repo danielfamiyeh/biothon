@@ -26,7 +26,7 @@ class TestAlignAlgo(unittest.TestCase):
 
         print(needle_aligner.align(Seq("ATACGGTAGCTTCATTATCGGCTAGGCTGTACACACGGTATAACAGAGGTAGGAGCTCGGCTGAGAGTTTTGCAGT",
                                        id="Jaykwonronda"),
-                                    Seq("ATATATATAGGCGAGTCGAGATAGGCGCGTGATACACAGAATAGGCGGCTCAG", id="Ty-esha")))
+                                    Seq("ATATATATAGGCGAGTCGAGATAGGCGCGTGATACACAGAATAGGCGGCTCAG", id="1234567")))
 
         local_aligner = LocalAligner(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM),
                                gap=-2)
@@ -39,8 +39,8 @@ class TestAlignAlgo(unittest.TestCase):
         print(affine_local.align(Seq("TTAAG"), Seq("AAGA")))
 
         overlap_detect = OverlapDetector(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
-        print(overlap_detect.align(Seq("TATCCGATAGCTGGTAC", id="jaykwon"), Seq("GATAGC",
-                                                                                 id="daykwanda")))
+        print(overlap_detect.align(Seq("TATCCGATAGCTGGTAC", id="123"), Seq("GATAGC",
+                                                                                 id="123456789")))
 
 
 if __name__ == '__main__':
