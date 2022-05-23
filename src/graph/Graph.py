@@ -1,238 +1,181 @@
-from enum import Enum
+from src.graph.Vertex import *
 
-class _SPF(Enum):
-    """
-    Arbitrary shortest path vertices enum.
-    """
-    SOURCE = 0
-    TARGET = 1
-
-class Vertex:
-    """
-    Vertex class.
-    """
-    def __init__(self, n, v):
-        """
-        Vertex constructor.
-        :param n:   Name of vertex.
-        :param v:   Vertex value.
-        """
-        self. name = n
-        self.value = v
-        self.edges = {} # The edge family is meant to be a nonempty set but we'll allow that ;)
-        self.pred = None
-
-    def __repr__(self):
-        return f"V({self.name}:{self.value} E:{self.edges})"
 
 class Graph:
-    """
-    Graph class for a simple, weighted graph.
-    """
-    def __init__(self):
-        self._V = {}
-        self.num_edges = 0
-        self.num_vertices = 0
+    """Directed Graph ADT"""
 
-    def __repr__(self):
-        as_string = "Graph\n"
-        for i, v in enumerate(self._V):
-            as_string += str(self._V[v]) + "\n"
-        return as_string
+    def __init__(self, vertices=None):
+        if vertices is None:
+            vertices = []
+        self.g = {v: Vertex(v) for v in vertices}
 
-    def adjacent(self, x, y):
+    def add_vertex(self, v):
         """
-        Tests to see if an edge exists from vertex x to vertex y.
-        :param x:   Name of source vertex.
-        :param y:   Name of destination vertex.
-        :return:    True if vertices are adjacent, else False.
-        """
-        return True if y in self._V[x].edges else False
-
-    def neighbours(self, x):
-        """
-        Returns a list of neighbours of vertex x.
-        :param x:   Name of verte
+        Adds vertex given by v to graph
+        :param v: (Any): Vertex name/data
         :return:
         """
-        return [neighbour for neighbour in self._V[x]]
+        if v not in self.g:
+            self.g[v] = Vertex(v)
 
-    def add_vertex(self, x, v=0):
-        """
-        Adds a vertex with name x and value v, if vertex with name x does
-            not exist in graph.
-        :param x:   Name of vertex to add to graph.
-        :param v:   Value of vertex x to add to graph.
-        :return:    None
-        """
-        if x not in self._V:
-            self._V[x] = Vertex(x, v)
-        self.num_vertices += 1
+    def add_vertices(self, *args):
+        for v in args:
+            if v not in self.g:
+                self.g[v] = Vertex(v)
 
-    def remove_vertex(self, x):
+    def exists(self, v):
         """
-        Removes vertex with name x from graph.
-        :param x:   Name of vertex to remove from graph.
-        :return:    None
+        Checks that vertex given by v exists in graph
+        :param v: (String): Vertex name
+        :return: (Boolean): True if vertex exists, else False
         """
-        if x in self._V:
-            del self._V[x]
+        return v in self.g
 
-        for v in self._V:
-            for neighbour in self._V[v]:
-                if neighbour[0].value == x:
-                    self._V[v].edges.remove(neighbour)
-
-    def add_edge(self, x, y, w=0, directed=True):
+    def add_edge(self, u, v, weight=0.0, directed=True):
         """
-        Adds an edge from vertex with name x to vertex with name y
-            with a weight of 0 to graph. Edge can either be directed
-            or undirected.
-        :param x:           Name of source vertex
-        :param y:           Name of destination vertex
-        :param w:           Weight of edge between the two vertices
-        :param directed:    Adds a directed edge if True, else an undirected edge.
-        :return:            None
+        Adds a undirected edge from vertex u to v.
+        :param u: (String): Source vertex
+        :param v: (String): Destination vertex
+        :param weight: (Float): Edge weight
+        :param directed: (Boolean): Adds a directed edge if True,
+            else undirected edge
+        :return: None
         """
-        if x in self._V and y in self._V:
-            self._V[x].edges[y] = w
+        if u in self.g and v in self.g:
+            self.g[u].add_edge(endpoint=v,
+                               weight=weight)
             if not directed:
-                self._V[y].edges[x] = w
+                self.g[v].add_edge(endpoint=u,
+                                   weight=weight)
 
-    def remove_edge(self, x, y):
+    def add_edges(self, edges):
+        for e in edges:
+            u = e[0]
+            v = e[1]
+            weight = e[2] if len(e) > 2 else 0.0
+            directed = e[3] if len(e) > 3 else True
+            self.add_edge(u, v, weight, directed)
+
+    def get_vertex(self, v):
         """
-        Removes an edge from vertex with name x to vertex with name y,
-            should such an edge exist.
-        :param x:   Name of source vertex
-        :param y:   Name of destination vertex
-        :return:    None
+        Gets Vertex object with name v.
+        :param v: (String): Vertex name
+        :return: Vertex object with name v
         """
-        if x in self._V and y in self._V:
-            source = self._V[x]
-            if y in source.edges:
-                del source.edges[y]
+        try:
+            return self.g[v]
+        except:
+            print("Vertex does not exist")
 
-    def get_vertex_value(self, x):
+    def adjacent(self, u, v):
         """
-        Returns vertex value of vertex with name x.
-        :param x:   Vertex name
-        :return:    Value of vertex with name x
+        Checks to see if an edge from u to v exists
+        :param u: (String) Source vertex name
+        :param v: (String) Destination vertex name
+        :return: (Boolean)
         """
-        return self._V[x].value if x in self._V else None
+        if u in self.g and v in self.g:
+            return self.g[u].adjacent(v)
+        return False
 
-    def set_vertex_value(self, x, v):
+    def neighbours(self, v):
         """
-        Sets vertex value of vertex with name x to value v
-        :param x:   Vertex name
-        :param v:   New value of vertex
-        :return:    None
+        Returns neighbourhood of vertex v
+        :param v: (String): Vertex name
+        :return: Set of vertices neighbouring vertex v
         """
-        if x in self._V:
-            self._V[x].value = v
+        if v in self.g:
+            source = self.g[v]
+            return set([n for n in source.edges])
+        return set()
 
-    def get_edge_value(self, x, y):
+    def euler_circuit(self):
         """
-        Returns the weight of an edge from a vertex with name x to vertex
-            with name y.
-        :param x:   Source vertex name
-        :param y:   Destination vertex name
-        :return:    Edge weight
+        Searches for eulerian circuit in graph
+        :return: List in vertices
         """
-        if x in self._V and y in self._V:
-            if y in self._V[x].edges:
-                return self._V[x].edges[y]
 
-    def set_edge_value(self, x, y, w):
+        def forward(vertex, edges_explored, edges_max):
+            path = []
+            current = (vertex, -1)
+            while True:
+                print(current)
+                added = False
+                path.append(current)
+                current_v = self.g[current[0]]
+                for neighbour_name, edges in current_v.edges.items():
+                    for i, edge in enumerate(edges):
+                        if edges_explored[current[0]][neighbour_name] < edges_max[current[0]][neighbour_name]:
+                            edges_explored[current[0]][neighbour_name] += 1
+                            current = neighbour_name, i
+                            added = True
+                            break
+                    if added:
+                        break
+                if not added:
+                    return path
+
+        vertices = list(self.g.keys())
+        current_vertex = None
+        new_cycle, old_cycle = [], []
+        edges_explored = {u: {v: 0 for v in self.g[u].edges} for u in vertices}
+
+        edges_max = {u: {v: len(self.g[u].edges[v])
+                         for v in self.g[u].edges} for u in vertices}
+
+        print(forward(vertices[1], edges_explored, edges_max))
+        while True:
+            for v in vertices:
+                found = False
+                vertex_v = self.g[v]
+                edgedict = vertex_v.edges
+                for neighbour, edges in edgedict.items():
+                    for i, edge in enumerate(edges):
+                        if edges_explored[v][neighbour][i] != \
+                                edges_max[v][neighbour][i]:
+                            current_vertex = v
+                            found = True
+                        if found:
+                            break
+                    if found:
+                        break
+                if v == vertices[len(vertices) - 1] or current_vertex is None:
+                    return old_cycle
+
+            break
+
+    def __add__(self, other):
         """
-        Sets the value of edge from vertex with name x to vertex with name y
-            to the value given by w, should such an edge exist.
-        :param x:   Name of source vertex
-        :param y:   Name of destination vertex
-        :param w:   Value of new weight of edge between the two/
-        :return:    None
+        Returns two graphs 'glued' together in the de Brujin sense
+        :param other: Other graph
+        :return: Glued graph
         """
-        if x in self._V and y in self._V:
-            if y in self._V[x].edges:
-                self._V[x].edges[y] = w
-            else:
-                print(f"Edge does not exist between {x} and {y}.")
+        new_graph = Graph(list(self.g.keys()) + list(other.g.keys()))
+        for u in self.g:
+            vertex_u = self.g[u]
+            for v in vertex_u.edges:
+                edgelist = vertex_u.edges[v]
+                for e in edgelist:
+                    new_graph.add_edge(u, v, e.weight, True)
+        for u in other.g:
+            vertex_u = other.g[u]
+            for v in vertex_u.edges:
+                edgelist = vertex_u.edges[v]
+                for e in edgelist:
+                    new_graph.add_edge(u, v, e.weight, True)
+        return new_graph
 
-    def _top_sort(self, s, visited, stack):
+    def __iadd__(self, other):
         """
-        Internal topological sorting function.
-        :param s:       Vertex currently being processed.
-        :param visited: List containing visited vertices.
-        :param stack:   Stack containing vertices to visit.
-        :return:        None
+        Glues this graph with graph other, in-place
+        :param other: Other graph to be glued with
+        :return: None
         """
-        visited[s] = True
-        for v in self._V[s].edges:
-            if not visited[v]:
-                self._top_sort(v, visited, stack)
-        stack.append(s)
-
-    def top_sort(self):
-        """
-        External topological sorting function.
-        :return:    List contining names of veritces sorte topologically.
-        """
-        visited = {v: False for v in self._V}
-        stack = []
-
-        for v in self._V:
-            if not visited[v]:
-                self._top_sort(v, visited, stack)
-        return stack
-
-    def chaining(self):
-        """
-        The chaining algorithm required ClustalW MSA.
-        :return:
-        """
-        # Initialise arbitrary source and target vertices
-        source = Vertex(_SPF.SOURCE, 0)
-        target = Vertex(_SPF.TARGET, 0)
-        # Final chain
-        chain = []
-
-        # Iterate over vertex map
-        for name, v in self._V.items():
-            # Assign zero from source
-            source.edges[name] = 0
-            # Assign zero cost to target
-            v.edges[_SPF.TARGET] = 0
-
-        # Insert source vertex in to vertex map
-        self._V[_SPF.SOURCE] = source
-        # Insert target vertex in vertex map
-        self._V[_SPF.TARGET] = target
-
-        # Iterate over every vertex in vertex map
-        for name, v in self._V.items():
-            # Iterate over all edges of vertex
-            for n, w in v.edges.items():
-                # If neighbour's distance is less than
-                # current vertex's distance + cost to neighbour
-                if self._V[n].value < (v.value + w):
-                    # Set neighbour's distance
-                    self._V[n].value = v.value + w
-                    # Set neighbour's predecessor
-                    self._V[n].pred = v.name
-
-        # Initialise current to target's predecessor
-        current = self._V[_SPF.TARGET].pred
-
-        # iterate backwards through predecessor chain
-        while current is not None:
-            # Add predeessor name vertex to chain
-            chain.append(current)
-            # Set current to predecessor
-            current = self._V[current].pred
-
-        return chain
-
-
-
-
-
-
+        self.add_vertices(tuple(other.g.keys()))
+        for u in other.g:
+            vertex_u = other.g[u]
+            for v in vertex_u.edges:
+                edgelist = vertex_u.edges[v]
+                for e in edgelist:
+                    self.add_edge(u, v, e.weight, True)
+        return self

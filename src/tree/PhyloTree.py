@@ -1,4 +1,6 @@
-from src.align.pair import PairAligner
+from src.align.pair.PairAligner import *
+from src.matrix.ScoreMatrix import *
+from src.align.pairwise.AffineGlobal import *
 from copy import deepcopy
 
 class _Taxon:
@@ -46,7 +48,7 @@ class PhyloTree:
         :return: None
         """
         # TODO: Change for all sequence types
-        aligner = PairAligner(NucleoScoreMatrix(NucleoScoreType.IDENTITY))
+        aligner = AffineGlobal(score_mat=NucleoScoreMatrix(NucleoScoreType.NON_UNIFORM))
         # Initialise highest distance found tuple with
         #   highest[0] = -1
         #   highest[1] = (blank)
@@ -61,7 +63,7 @@ class PhyloTree:
                 #   is symmetric
                 if int(d) > i:
                     # Calculate distance using NW
-                    dist = aligner.needle(self.S[int(t)], self.S[int(d)]).dist
+                    dist = aligner.align(self.S[int(t)], self.S[int(d)]).dist
                     # Assign distances
                     self.taxa[t].dists[d] = dist
                     self.taxa[d].dists[t] = dist

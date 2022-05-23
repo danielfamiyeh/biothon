@@ -1,4 +1,5 @@
 from enum import Enum
+from src.parser.ScoreMatrixParser import *
 
 
 class _ScoreMatrix:
@@ -11,6 +12,12 @@ class _ScoreMatrix:
         :param mat: Matrix of substitution scores
         """
         self.mat = mat
+
+    def __str__(self):
+        string = ""
+        for key in self.mat:
+            string += f"{key} {self.mat[key]}\n"
+        return string
 
     def lookup(self, i, j):
         """
@@ -60,7 +67,13 @@ class AminoScoreType(Enum):
     """
     Amino acid score matrix type enum.
     """
-    BLOSUM62 = 0    # BLOSUM62 substitution matrix
+    BLOSUM50 = 0
+    BLOSUM62 = 1
+    BLOSUM80 = 2
+    BLOSUM90 = 3
+    PAM30 = 4
+    PAM70 = 5
+    PAM250 = 6
 
 
 class AminoScoreMatrix(_ScoreMatrix):
@@ -75,7 +88,7 @@ class AminoScoreMatrix(_ScoreMatrix):
         if score_type in AminoScoreType:
             self.score_type = score_type
             if score_type is AminoScoreType.BLOSUM62:
-                super(AminoScoreMatrix, self).__init__(_AMINO_BLOSUM62)
+                super(AminoScoreMatrix, self).__init__(load(score_type))
         else:
             raise TypeError("Param score_type must be of type AminoScoreType")
 

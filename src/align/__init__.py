@@ -1,1 +1,1 @@
-from src.align import pair
+from src.align import pairwise

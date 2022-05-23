@@ -57,8 +57,9 @@ class SeqType(Enum):
     PROTEIN = 3
 
 
-_nucleo_complement = {"A": "T", "C": "G", "T": "A", "G": "C"}
-_nucleo_transition = {"A": "G", "C": "T", "G": "A", "T": "C"}
+_dna_complement = {"A": "T", "C": "G", "T": "A", "G": "C"}
+_rna_complement = {"A": "U", "C": "G", "U": "A", "G": "C"}
+_dna_transition = {"A": "G", "C": "T", "G": "A", "T": "C"}
 
 
 class Seq:
@@ -94,13 +95,12 @@ class Seq:
             self.seq += c.upper()
 
         self.seq_type = stype
-        self.id = kwargs.get("id", "")
+        self.id = str(kwargs.get("id", ""))
         self.name = kwargs.get("name", "")
         self.desc = kwargs.get("desc", "")
         self.label = ""  # For Guide/PhyloTree creation - Do not use.
         self.weight = 1  # For PhyloTree creation - Do not use.
 
-    # Class Methods
     def transit(self, seq):
         """
         Transition-Transversion ratio method.
@@ -121,14 +121,14 @@ class Seq:
                 # If characters do not match
                 if self.seq[i] != seq[i]:
                     # Check if substitution is a transition
-                    if _nucleo_transition[self.seq[i]] == seq[i]:
+                    if _dna_transition[self.seq[i]] == seq[i]:
                         # If it is increment transition counter
                         transitions += 1
                     else:
                         # Else increment transversion counter
                         transversions += 1
             # Return rounded answer to 11 decimal places
-            return round(transitions / transversions, 11)
+            return round(transitions / transversions, 5)
 
         # If sequences are not compatible then throw error
         else:
@@ -152,16 +152,18 @@ class Seq:
             raise ValueError("Both sequences must be of same"
                              "length for point_mutations() method.")
 
-    def find_motif(self, subseq):
+    def find_motif(self, subseq, **kwargs):
         """
         Finds the indices where the subsequence given by subseq can be found.
         :param subseq:  Subsequence reprsenting motif.
         :return:        List of indices where motif can be found.
         """
+        overlap = kwargs.get("overlap", False)
         # Initialise empty list of indices
         indices = []
         # Iterate over sequence length wrt to substring length
-        for i in range(len(self) - (len(subseq) - 1)):
+        for i in range(0, len(self) - (len(subseq) - 1),
+                       1 if overlap else len(subseq)):
             # If substring found
             if self[i: i + len(subseq)] == subseq:
                 # Append index list
@@ -213,10 +215,10 @@ class Seq:
         """
 
         # Check that sequence is DNA or RNA
-        if self.seq_type is SeqType.DNA or self.seq_type is SeqType.RNA:
-            # Replace seq with complement via joined list comprehension
-            self.seq = ''.join(["A" if base == "U" else _nucleo_complement[base]
-                                for base in self.seq])
+        if self.seq_type is SeqType.DNA:
+            self.seq = ''.join([_dna_complement[base] for base in self.seq])
+        elif self.seq_type is SeqType.RNA:
+            self.seq = ''.join(_rna_complement[base] for base in self.seq)
         else:
             # Throw type error if sequence is not of valid type
             raise TypeError("Sequence type must be DNA or RNA for complement "
@@ -250,10 +252,13 @@ class Seq:
         if self.seq_type is SeqType.DNA:
             # Change sequence to RNA
             self.seq_type = SeqType.RNA
-            # For intron in args
-            for s in args:
-                # Splice intron
-                self.seq = self.seq.replace(s, "")
+            if len(args) > 0:
+                spliced = ""
+                for i in range(0, len(self)-2, 3):
+                    codon = self[i:i+3]
+                    spliced += "" if codon in args else codon
+
+                self.seq = spliced
             # Join spliced sequence
             self.seq = ''.join(["U" if base == "T" else base for base in self.seq])
         else:
@@ -319,7 +324,7 @@ class Seq:
                     if stop_codon and amino_index == -1:
                         break
 
-                    # Add protein to polypeptide chain
+                    # Add amino acid to polypeptide chain
                     chain += alphabet_protein_1[amino_index]
                     # Clear codon list
                     codon.clear()
@@ -330,19 +335,40 @@ class Seq:
             raise TypeError(f"{self.seq_type} is not a translatable sequence "
                             f"type.")
 
+    def copy(self):
+        return Seq(self.seq, self.seq_type, id=self.id,
+                   name=self.name, desc=self.desc)
+
+    def set_seq(self, seq):
+        self.seq = seq
+
+    def split(self, delimiter=""):
+        split_seq_data = self.seq.split(delimiter)
+        split_seqs = [Seq(seq_data, self.seq_type, id=self.id,
+                          name=self.name, desc=self.desc)
+                      for seq_data in split_seq_data]
+        return split_seqs
+
     def __repr__(self):
-        string = f"{self.name} | {self.seq_type}:\n"
-        string += "".join([f"{c}\n" if i > 0 and i % 60 == 0
-                           else c for i, c in enumerate(self)])
+        string = f"Seq({str(self)})"
+        string += "\n"
+        string += f"{self.id + '|' if len(self.id) > 0 else ''}" \
+                 f"{self.name + '|' if len(self.name) > 0 else ''}" \
+                 f"{self.desc if len(self.desc) > 0 else ''}"
+
         return string
 
     def __str__(self):
-        return self.seq
-
+        return "".join([f"{c}\n" if i > 0 and i % 60 == 0
+                           else c for i, c in enumerate(self)])
     def __invert__(self):
-        if self.seq_type is SeqType.DNA or self.seq_type is SeqType.RNA:
-            return Seq(''.join(["A" if base == "U" else _nucleo_complement[base]
-                                for base in self.seq]), self.seq_type)
+        if self.seq_type is SeqType.DNA:
+            return Seq(''.join([_dna_complement[base] for base in self]),
+                       self.seq_type, id=self.id, name=self.name, desc=self.desc)
+
+        elif self.seq_type is SeqType.RNA:
+            return Seq(''.join([_rna_complement[base] for base in self]),
+                       self.seq_type, id=self.id, name=self.name, desc=self.desc)
         else:
             raise TypeError("Sequence type must be DNA or RNA for complement "
                             "operator.")
