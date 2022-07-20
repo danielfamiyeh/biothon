@@ -8,5 +8,5 @@ The library is standalone, requiring only the Python Standard Library to use.
 ## Features
 - [x] Basic Biosequence Manipulation (Transciption with slicing, Translation, G-C content and More)
 - [x] Pairwise Sequence Alignment (Needleman-Wunsch, Smith-Waterman, Hirschberg's, FASTA and BLAST)
-- [x] Multiple Sequence ALignment (ClustalW)
+- [x] Multiple Sequence Alignment (ClustalW)
 - [x] Clustering (Phylogenetic Tree Construction, k-Medoid)
